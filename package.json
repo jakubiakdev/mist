@@ -1,0 +1,22 @@
+{
+  "dependencies": {
+    "discord.js": "^12.5.1"
+  },
+  "name": "mist",
+  "version": "0.1.0",
+  "description": "Discord bot for working with steam api ",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jakubiakdev/mist.git"
+  },
+  "author": "jakubiakdev",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jakubiakdev/mist/issues"
+  },
+  "homepage": "https://github.com/jakubiakdev/mist#readme"
+}
