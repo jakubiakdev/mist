@@ -39,23 +39,86 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
         steam.resolve(interaction.data.options[0].value).then(id => {
             steam.getUserSummary(id).then(summary => {
                 console.debug(summary);
+                var correctRealName = summary.realName || "Not provided";
+                if (summary.created == undefined) {
+                    var correctCreationTime = "Unknown";
+                }else{
+                    var correctCreationTime = new Date(summary.created * 1000);
+                };
+                switch(summary.personaState) {
+                    case 0:
+                        var correctPersonaState = "Offline ⚫"
+                        break;
+                    case 1:
+                        var correctPersonaState = "Online 🟢"
+                        break;
+                    case 2:
+                        var correctPersonaState = "Busy 🔴"
+                        break;
+                    case 3:
+                        var correctPersonaState = "Away 🟡"
+                        break;
+                    case 4:
+                        var correctPersonaState = "Snooze 🔵"
+                        break;
+                    case 5:
+                        var correctPersonaState = "Looking to trade 📦"
+                        break;
+                    case 5:
+                        var correctPersonaState = "Looking to play 🎮"
+                        break;
+                    default:
+                        var correctPersonaState = "Unknown"
+                        break;
+                };
+                if (summary.visibilityState == 3) { var correctPrivacyOption = "Public"} else { var correctPrivacyOption = "Private"};
                 client.api.interactions(interaction.id, interaction.token).callback.post({
                     data: {
                         type: 4,
                         data: {
                             "embeds": [
                             {
+                                color: "47602",
+                                author: { 
+                                    "name": "mist",
+                                    "url": config.webpage
+                                },
                                 title: summary.nickname, //get all the fun stuff from steamapi playersummary and sends it as an embed
                                 thumbnail: { "url": summary.avatar.large },
                                 fields: [
                                     {
-                                      name: "SteamID: ",
-                                      value: summary.steamID,
-                                      inline: true
+                                        name: "Privacy option: ",
+                                        value: correctPrivacyOption,
+                                        inline: false
+                                    },
+                                    {
+                                        name: "Current status: ",
+                                        value: correctPersonaState,
+                                        inline: true
+                                    },
+                                    {
+                                        name: "SteamID: ",
+                                        value: summary.steamID,
+                                        inline: true
+                                    },
+                                    {
+                                        name: "URL: ",
+                                        value: summary.url,
+                                        inline: false
+                                    },
+                                    {
+                                        name: "Creation time: ",
+                                        value: correctCreationTime,
+                                        inline: true
+                                    },
+                                    {
+                                        name: "Real name: ",
+                                        value: correctRealName,
+                                        inline: true
                                     }
                                 ],
                                 footer: {
-                                    text: "Steam profile overview"
+                                    text: "Steam profile summary"
                                 }
                             }
                             ]
@@ -71,6 +134,11 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                     data: {
                         "embeds": [
                         {
+                            color: "47602",
+                            author: { 
+                                "name": "mist",
+                                "url": config.webpage
+                            },
                             title: `SteamID of ${interaction.data.options[0].value}`,
                             description: `${steamid}` //sends it as an embed
                         }

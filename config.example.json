@@ -1,6 +1,7 @@
 {
     "token": "your token here",
     "ownerid": "your id",
+    "webpage": "webpage for your bot, used for embeds",
     "apikeys": {
         "steam": "your steam api key from https://steamcommunity.com/dev/registerkey"
     } 
