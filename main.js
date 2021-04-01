@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const SteamAPI = require('steamapi');
+const SteamAPI = require('steamapi'); // api reference: https://github.com/xDimGG/node-steamapi#documentation
 const client = new Discord.Client();
 const config = require('./config.json'); 
 
@@ -38,7 +38,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
     if(interaction.data.name == 'profile') { 
         steam.resolve(interaction.data.options[0].value).then(id => {
             steam.getUserSummary(id).then(summary => {
-                console.log(summary);
+                console.debug(summary);
                 client.api.interactions(interaction.id, interaction.token).callback.post({
                     data: {
                         type: 4,
@@ -53,7 +53,10 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                                       value: summary.steamID,
                                       inline: true
                                     }
-                                  ]
+                                ],
+                                footer: {
+                                    text: "Steam profile overview"
+                                }
                             }
                             ]
                         }
