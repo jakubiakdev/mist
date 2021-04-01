@@ -3,6 +3,7 @@ Discord bot for accessing steam using `steamapi`
 
 ## Features
 - Displaying steam profiles
+- Resolving steamID
 
 
 ## TODO:

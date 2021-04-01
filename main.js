@@ -36,16 +36,32 @@ client.on('message', message => {   //eval handling
 
 client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
     if(interaction.data.name == 'profile') { 
-        /*
         steam.resolve(interaction.data.options[0].value).then(id => {
             steam.getUserSummary(id).then(summary => {
                 console.log(summary);
+                client.api.interactions(interaction.id, interaction.token).callback.post({
+                    data: {
+                        type: 4,
+                        data: {
+                            "embeds": [
+                            {
+                                title: summary.nickname, //get all the fun stuff from steamapi playersummary and sends it as an embed
+                                thumbnail: { "url": summary.avatar.large },
+                                fields: [
+                                    {
+                                      name: "SteamID: ",
+                                      value: summary.steamID,
+                                      inline: true
+                                    }
+                                  ]
+                            }
+                            ]
+                        }
+                    }}); 
             })
         });
-        */ 
-       console.log('currently unsupported')
     } else if (interaction.data.name == 'steamid') {
-        steam.resolve(interaction.data.options[0].value).then(steamid => {
+        steam.resolve(interaction.data.options[0].value).then(steamid => { //gets steamid from steamapi lib
             client.api.interactions(interaction.id, interaction.token).callback.post({
                 data: {
                     type: 4,
@@ -53,7 +69,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                         "embeds": [
                         {
                             title: `SteamID of ${interaction.data.options[0].value}`,
-                            description: `${steamid}`
+                            description: `${steamid}` //sends it as an embed
                         }
                         ]
                     }
