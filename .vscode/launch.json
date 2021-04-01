@@ -6,6 +6,7 @@
     "configurations": [
         {
             "type": "pwa-node",
+            "console": "integratedTerminal",
             "request": "launch",
             "name": "Launch Program",
             "skipFiles": [
