@@ -1,6 +1,10 @@
 const Discord = require('discord.js');
+const SteamAPI = require('steamapi');
 const client = new Discord.Client();
 const config = require('./config.json'); 
+
+const steam = new SteamAPI(config.apikeys.steam);
+
 
 client.on('ready', () => { 
 	console.log('Welcome to Mist'); 
@@ -31,25 +35,34 @@ client.on('message', message => {   //eval handling
 });
 
 client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
-    client.api.interactions(interaction.id, interaction.token).callback.post({data: {
-        type: 4,
-        data: {
-            "embeds": [
-              {
-                "description": "hi",
-                "color": 8777630
-              }
-            ]
-          }
-      }})
-})
-/*
-TODO:
- - There is no distinguishing between commands
- - there is actually 0 api implementation, it just sends out an embed
- - eval should probably be removed and moved to anoter file in repo so it would be used only for debugging
- - creating a slash command isn't implemented or even explained
-*/ 
+    if(interaction.data.name == 'profile') { 
+        /*
+        steam.resolve(interaction.data.options[0].value).then(id => {
+            steam.getUserSummary(id).then(summary => {
+                console.log(summary);
+            })
+        });
+        */ 
+       console.log('currently unsupported')
+    } else if (interaction.data.name == 'steamid') {
+        steam.resolve(interaction.data.options[0].value).then(steamid => {
+            client.api.interactions(interaction.id, interaction.token).callback.post({
+                data: {
+                    type: 4,
+                    data: {
+                        "embeds": [
+                        {
+                            title: `SteamID of ${interaction.data.options[0].value}`,
+                            description: `${steamid}`
+                        }
+                        ]
+                    }
+                }});
+        });
+    }
+    }
+)
+
 
 
 
