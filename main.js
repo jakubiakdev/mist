@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const SteamAPI = require('steamapi'); // api reference: https://github.com/xDimGG/node-steamapi#documentation
+const SteamAPI = require('steamapi'); // api reference: https://github.com/xDimGG/node-steamapi#documentation and https://developer.valvesoftware.com/wiki/Steam_Web_API
 const client = new Discord.Client();
 const config = require('./config.json'); 
 
@@ -147,10 +147,28 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                 }});
         });
     }
+    process.on('uncaughtException', uncaughtException => { //on the error, lets send an embed with the error message from the lib
+        console.error("Something has gone wrong! " + uncaughtException);
+        client.api.interactions(interaction.id, interaction.token).callback.post({
+            data: {
+                type: 4,
+                data: {
+                    "embeds": [
+                    {
+                        color: "47602",
+                        author: { 
+                            "name": "mist",
+                            "url": config.webpage
+                        },
+                        title: `Something has gone wrong! ⚠️`,
+                        description: `${uncaughtException}` //gets the error and sends it
+                    }
+                    ]
+                }
+            }});
+    });
     }
-)
-
-
+);
 
 
 
