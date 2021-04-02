@@ -151,34 +151,74 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                 });
             });
         case 'showcase':
-            steam.resolve(interaction.data.options[0].value).then(id => {
-                steam.getUserSummary(id).then(summary => {
-                    client.api.interactions(interaction.id, interaction.token).callback.post({
-                        data: {
-                            type: 5,
-                        }
-                    });
-                    (async () => {
-                        const browser = await puppeteer.launch({ defaultViewport: { width: 1920, height: 1080 }, headless: true });
-                        const page = await browser.newPage();
-                        page.setJavaScriptEnabled(false);
-                        await page.goto(`https://steamcommunity.com/profiles/${summary.steamID}`); //go to profile page
-                        await page.evaluate(() => {
-                            let dom = document.querySelector('#global_header'); //remove top and bottom bars from steam page
-                            dom.parentNode.removeChild(dom);
+            if (client.channels.cache.get(interaction.channel_id).nsfw == true) {
+                steam.resolve(interaction.data.options[0].value).then(id => {
+                    steam.getUserSummary(id).then(summary => {
+                        client.api.interactions(interaction.id, interaction.token).callback.post({
+                            data: {
+                                type: 5,
+                            }
                         });
-                        await page.evaluate(() => {
-                            let dom = document.querySelector('#footer');
-                            dom.parentNode.removeChild(dom);
-                        })
-                        let screenshot = await page.screenshot({ type: 'png', fullPage: true, encoding: 'buffer' });
-                        const attachment = new Discord.MessageAttachment(screenshot, 'screenshot.png'); //take a screenshot and make it a messageattachment
-                        await browser.close();
-                        let embed = new Discord.MessageEmbed().setColor('0x00B9F2').setImage('attachment://screenshot.png').setAuthor('mist', '', config.webpage).setTitle(`Steam profile showcase of ${summary.nickname}`);
-                        new Discord.WebhookClient(client.user.id, interaction.token).send({ embeds: [embed], files: [attachment] }); //send a followup with the screenshot
-                    })();
+                        (async () => {
+                            const browser = await puppeteer.launch({ defaultViewport: { width: 1920, height: 1080 }, headless: true });
+                            const page = await browser.newPage();
+                            page.setJavaScriptEnabled(false);
+                            await page.goto(`https://steamcommunity.com/profiles/${summary.steamID}`); //go to profile page
+                            await page.evaluate(() => {
+                                let dom = document.querySelector('#global_header'); //remove top and bottom bars from steam page
+                                dom.parentNode.removeChild(dom);
+                            });
+                            await page.evaluate(() => {
+                                let dom = document.querySelector('#footer');
+                                dom.parentNode.removeChild(dom);
+                            })
+                            let screenshot = await page.screenshot({ type: 'png', fullPage: true, encoding: 'buffer' });
+                            const attachment = new Discord.MessageAttachment(screenshot, 'screenshot.png'); //take a screenshot and make it a messageattachment
+                            await browser.close();
+                            let embed = new Discord.MessageEmbed().setColor('0x00B9F2').setImage('attachment://screenshot.png').setAuthor('mist', '', config.webpage).setTitle(`Steam profile showcase of ${summary.nickname}`);
+                            new Discord.WebhookClient(client.user.id, interaction.token).send({ embeds: [embed], files: [attachment] }); //send a followup with the screenshot
+                        })();
+                    });
                 });
-            });
+            } else if (client.channels.cache.get(interaction.channel_id).nsfw == false) {
+                client.api.interactions(interaction.id, interaction.token).callback.post({
+                    data: {
+                        type: 4,
+                        data: {
+                            "embeds": [
+                                {
+                                    color: "47602",
+                                    author: {
+                                        "name": "mist",
+                                        "url": config.webpage
+                                    },
+                                    title: `Something went wrong! ⚠️`,
+                                    description: `You cannot use this command on non-nsfw channels!` //gets the error and sends it
+                                }
+                            ]
+                        }
+                    }
+                });
+            } else {
+                client.api.interactions(interaction.id, interaction.token).callback.post({
+                    data: {
+                        type: 4,
+                        data: {
+                            "embeds": [
+                                {
+                                    color: "47602",
+                                    author: {
+                                        "name": "mist",
+                                        "url": config.webpage
+                                    },
+                                    title: `Something went wrong! ⚠️`,
+                                    description: `For this command, bot needs to be [invited](https://discord.com/oauth2/authorize?client_id=${client.user.id}&scope=bot&permissions=1024) (even with minimum permissions) to check if channel is nsfw` //gets the error and sends it
+                                }
+                            ]
+                        }
+                    }
+                });
+            }
             break;
         default:
             client.api.interactions(interaction.id, interaction.token).callback.post({
@@ -192,7 +232,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                                     "name": "mist",
                                     "url": config.webpage
                                 },
-                                title: `Something has gone wrong! ⚠️`,
+                                title: `Something went wrong! ⚠️`,
                                 description: `${interaction.data.name} is not expected` //gets the error and sends it
                             }
                         ]
