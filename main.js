@@ -35,43 +35,100 @@ client.on('message', message => {   //eval handling
 });
 
 client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
-    if(interaction.data.name == 'profile') { 
-        steam.resolve(interaction.data.options[0].value).then(id => {
-            steam.getUserSummary(id).then(summary => {
-                console.debug(summary);
-                var correctRealName = summary.realName || "Not provided";
-                if (summary.created == undefined) {
-                    var correctCreationTime = "Unknown";
-                }else{
-                    var correctCreationTime = new Date(summary.created * 1000);
-                };
-                switch(summary.personaState) {
-                    case 0:
-                        var correctPersonaState = "Offline ⚫"
-                        break;
-                    case 1:
-                        var correctPersonaState = "Online 🟢"
-                        break;
-                    case 2:
-                        var correctPersonaState = "Busy 🔴"
-                        break;
-                    case 3:
-                        var correctPersonaState = "Away 🟡"
-                        break;
-                    case 4:
-                        var correctPersonaState = "Snooze 🔵"
-                        break;
-                    case 5:
-                        var correctPersonaState = "Looking to trade 📦"
-                        break;
-                    case 5:
-                        var correctPersonaState = "Looking to play 🎮"
-                        break;
-                    default:
-                        var correctPersonaState = "Unknown"
-                        break;
-                };
-                if (summary.visibilityState == 3) { var correctPrivacyOption = "Public"} else { var correctPrivacyOption = "Private"};
+    switch(interaction.data.name) {
+        case 'profile':
+                steam.resolve(interaction.data.options[0].value).then(id => {
+                steam.getUserSummary(id).then(summary => {
+                    console.debug(summary);
+                    var correctRealName = summary.realName || "Not provided";
+                    if (summary.created == undefined) {
+                        var correctCreationTime = "Unknown";
+                    }else{
+                        var correctCreationTime = new Date(summary.created * 1000);
+                    };
+                    switch(summary.personaState) {
+                        case 0:
+                            var correctPersonaState = "Offline ⚫"
+                            break;
+                        case 1:
+                            var correctPersonaState = "Online 🟢"
+                            break;
+                        case 2:
+                            var correctPersonaState = "Busy 🔴"
+                            break;
+                        case 3:
+                            var correctPersonaState = "Away 🟡"
+                            break;
+                        case 4:
+                            var correctPersonaState = "Snooze 🔵"
+                            break;
+                        case 5:
+                            var correctPersonaState = "Looking to trade 📦"
+                            break;
+                        case 5:
+                            var correctPersonaState = "Looking to play 🎮"
+                            break;
+                        default:
+                            var correctPersonaState = "Unknown"
+                            break;
+                    };
+                    if (summary.visibilityState == 3) { var correctPrivacyOption = "Public"} else { var correctPrivacyOption = "Private"};
+                    client.api.interactions(interaction.id, interaction.token).callback.post({
+                        data: {
+                            type: 4,
+                            data: {
+                                "embeds": [
+                                {
+                                    color: "47602",
+                                    author: { 
+                                        "name": "mist",
+                                        "url": config.webpage
+                                    },
+                                    title: summary.nickname, //get all the fun stuff from steamapi playersummary and sends it as an embed
+                                    thumbnail: { "url": summary.avatar.large },
+                                    fields: [
+                                        {
+                                            name: "Privacy option: ",
+                                            value: correctPrivacyOption,
+                                            inline: false
+                                        },
+                                        {
+                                            name: "Current status: ",
+                                            value: correctPersonaState,
+                                            inline: true
+                                        },
+                                        {
+                                            name: "SteamID: ",
+                                            value: summary.steamID,
+                                            inline: true
+                                        },
+                                        {
+                                            name: "URL: ",
+                                            value: summary.url,
+                                            inline: false
+                                        },
+                                        {
+                                            name: "Creation time: ",
+                                            value: correctCreationTime,
+                                            inline: true
+                                        },
+                                        {
+                                            name: "Real name: ",
+                                            value: correctRealName,
+                                            inline: true
+                                        }
+                                    ],
+                                    footer: {
+                                        text: "Steam profile summary"
+                                    }
+                                }
+                                ]
+                            }
+                        }}); 
+                })
+            });
+        case 'steamid':
+            steam.resolve(interaction.data.options[0].value).then(steamid => { //gets steamid from steamapi lib
                 client.api.interactions(interaction.id, interaction.token).callback.post({
                     data: {
                         type: 4,
@@ -83,51 +140,14 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                                     "name": "mist",
                                     "url": config.webpage
                                 },
-                                title: summary.nickname, //get all the fun stuff from steamapi playersummary and sends it as an embed
-                                thumbnail: { "url": summary.avatar.large },
-                                fields: [
-                                    {
-                                        name: "Privacy option: ",
-                                        value: correctPrivacyOption,
-                                        inline: false
-                                    },
-                                    {
-                                        name: "Current status: ",
-                                        value: correctPersonaState,
-                                        inline: true
-                                    },
-                                    {
-                                        name: "SteamID: ",
-                                        value: summary.steamID,
-                                        inline: true
-                                    },
-                                    {
-                                        name: "URL: ",
-                                        value: summary.url,
-                                        inline: false
-                                    },
-                                    {
-                                        name: "Creation time: ",
-                                        value: correctCreationTime,
-                                        inline: true
-                                    },
-                                    {
-                                        name: "Real name: ",
-                                        value: correctRealName,
-                                        inline: true
-                                    }
-                                ],
-                                footer: {
-                                    text: "Steam profile summary"
-                                }
+                                title: `SteamID of ${interaction.data.options[0].value}`,
+                                description: `${steamid}` //sends it as an embed
                             }
                             ]
                         }
-                    }}); 
-            })
-        });
-    } else if (interaction.data.name == 'steamid') {
-        steam.resolve(interaction.data.options[0].value).then(steamid => { //gets steamid from steamapi lib
+                    }});
+            });
+        default:
             client.api.interactions(interaction.id, interaction.token).callback.post({
                 data: {
                     type: 4,
@@ -139,13 +159,12 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                                 "name": "mist",
                                 "url": config.webpage
                             },
-                            title: `SteamID of ${interaction.data.options[0].value}`,
-                            description: `${steamid}` //sends it as an embed
+                            title: `Something has gone wrong! ⚠️`,
+                            description: `${interaction.data.name} is not expected` //gets the error and sends it
                         }
                         ]
                     }
                 }});
-        });
     }
     process.on('uncaughtException', uncaughtException => { //on the error, lets send an embed with the error message from the lib
         console.error("Something has gone wrong! " + uncaughtException);
