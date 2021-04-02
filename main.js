@@ -40,40 +40,44 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
         case 'profile':
             steam.resolve(interaction.data.options[0].value).then(id => {
                 steam.getUserSummary(id).then(summary => {
-                    console.debug(summary);
-                    var correctRealName = summary.realName || "Not provided";
+                    var correctRealName;
+                    var correctCreationTime;
+                    var correctPersonaState;
+                    var correctPrivacyOption;
+                    //console.debug(summary);
+                    correctRealName = summary.realName || "Not provided";
                     if (summary.created == undefined) {
-                        var correctCreationTime = "Unknown";
+                        correctCreationTime = "Unknown";
                     } else {
-                        var correctCreationTime = new Date(summary.created * 1000);
+                        correctCreationTime = new Date(summary.created * 1000);
                     };
                     switch (summary.personaState) {
                         case 0:
-                            var correctPersonaState = "Offline ⚫"
+                            correctPersonaState = "Offline ⚫"
                             break;
                         case 1:
-                            var correctPersonaState = "Online 🟢"
+                            correctPersonaState = "Online 🟢"
                             break;
                         case 2:
-                            var correctPersonaState = "Busy 🔴"
+                            correctPersonaState = "Busy 🔴"
                             break;
                         case 3:
-                            var correctPersonaState = "Away 🟡"
+                            correctPersonaState = "Away 🟡"
                             break;
                         case 4:
-                            var correctPersonaState = "Snooze 🔵"
+                            correctPersonaState = "Snooze 🔵"
                             break;
                         case 5:
-                            var correctPersonaState = "Looking to trade 📦"
+                            correctPersonaState = "Looking to trade 📦"
                             break;
                         case 5:
-                            var correctPersonaState = "Looking to play 🎮"
+                            correctPersonaState = "Looking to play 🎮"
                             break;
                         default:
-                            var correctPersonaState = "Unknown"
+                            correctPersonaState = "Unknown"
                             break;
                     };
-                    if (summary.visibilityState == 3) { var correctPrivacyOption = "Public" } else { var correctPrivacyOption = "Private" };
+                    if (summary.visibilityState == 3) { correctPrivacyOption = "Public" } else { correctPrivacyOption = "Private" };
                     client.api.interactions(interaction.id, interaction.token).callback.post({
                         data: {
                             type: 4,
