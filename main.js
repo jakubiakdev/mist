@@ -44,6 +44,8 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                     var correctCreationTime;
                     var correctPersonaState;
                     var correctPrivacyOption;
+                    var correctLastLogOff;
+                    var correctCountry;
                     //console.debug(summary);
                     correctRealName = summary.realName || "Not provided";
                     if (summary.created == undefined) {
@@ -77,6 +79,16 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                             correctPersonaState = "Unknown"
                             break;
                     };
+                    if (summary.lastLogOff == undefined) {
+                        correctLastLogOff = "Unknown";
+                    } else {
+                        correctLastLogOff = new Date(summary.lastLogOff * 1000);
+                    };
+                    if (summary.countryCode == undefined) {
+                        correctCountry = "Unknown";
+                    } else {
+                        correctCountry = `:flag_${summary.countryCode.toLowerCase()}:`;
+                    }
                     if (summary.visibilityState == 3) { correctPrivacyOption = "Public" } else { correctPrivacyOption = "Private" };
                     client.api.interactions(interaction.id, interaction.token).callback.post({
                         data: {
@@ -108,18 +120,28 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                                                 inline: true
                                             },
                                             {
+                                                name: "Real name: ",
+                                                value: correctRealName,
+                                                inline: true
+                                            },
+                                            {
+                                                name: "Country: ",
+                                                value: correctCountry,
+                                                inline: true
+                                            },
+                                            {
                                                 name: "URL: ",
                                                 value: summary.url,
                                                 inline: false
                                             },
                                             {
-                                                name: "Creation time: ",
-                                                value: correctCreationTime,
+                                                name: "Last online: ",
+                                                value: correctLastLogOff,
                                                 inline: true
                                             },
                                             {
-                                                name: "Real name: ",
-                                                value: correctRealName,
+                                                name: "Creation time: ",
+                                                value: correctCreationTime,
                                                 inline: true
                                             }
                                         ],
@@ -133,6 +155,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                     });
                 })
             });
+            break;
         case 'steamid':
             steam.resolve(interaction.data.options[0].value).then(steamid => { //gets steamid from steamapi lib
                 client.api.interactions(interaction.id, interaction.token).callback.post({
@@ -154,6 +177,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                     }
                 });
             });
+            break;
         case 'showcase':
             if (client.channels.cache.get(interaction.channel_id).nsfw == true) {
                 steam.resolve(interaction.data.options[0].value).then(id => {
@@ -243,6 +267,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                     }
                 }
             });
+            break;
     }
     process.on('uncaughtException', uncaughtException => { //on the error, lets send an embed with the error message from the lib
         console.error("Something has gone wrong! " + uncaughtException);
