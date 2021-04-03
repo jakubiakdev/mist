@@ -6,7 +6,7 @@ Discord bot for accessing steam using `steamapi`
 - Resolving steamID
 
 # Registering slashcommands
-You need to do this, otherwise you won't have an option to interact with your instacne
+You need to do this, otherwise you won't have an option to interact with your instance
 
 ## For a single server
 `node firstrun.js guild <type in id of your guild>`
