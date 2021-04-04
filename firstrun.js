@@ -2,6 +2,7 @@
 This script is literally made out of cardboard, shit and duct tape
 and needs to be rewritten ASAP
 */
+// this is helpful https://rauf.wtf/slash/
 const fetch = require('node-fetch');
 const Discord = require('discord.js');
 const client = new Discord.Client();
@@ -46,7 +47,29 @@ const commands = [
                 "required": true
             }
         ]
-    }
+    },
+    {
+        "name": "gamestats",
+        "description": "Displays users game stats",
+        "options": [
+          {
+            "type": 3,
+            "name": "URL",
+            "description": "Type in a URL of the profile (can be a steamID too!)",
+            "default": false,
+            "required": true
+          },
+          {
+            "type": 3,
+            "name": "GameID",
+            "description": "Type in a game id (from store page)",
+            "default": false,
+            "required": true
+          }
+        ]
+      }
+      
+      
 ];
 async function main() {
     const args = process.argv.slice(2);

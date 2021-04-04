@@ -3,6 +3,7 @@ const SteamAPI = require('steamapi'); // api reference: https://github.com/xDimG
 const client = new Discord.Client();
 const config = require('./config.json');
 const puppeteer = require('puppeteer');
+const { setMaxListeners } = require('process');
 
 const steam = new SteamAPI(config.apikeys.steam);
 
@@ -37,15 +38,10 @@ client.on('message', message => {   //eval handling
 
 client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
     switch (interaction.data.name) {
-        case 'profile':
+        case 'profile': {
             steam.resolve(interaction.data.options[0].value).then(id => {
                 steam.getUserSummary(id).then(summary => {
-                    var correctRealName;
-                    var correctCreationTime;
-                    var correctPersonaState;
-                    var correctPrivacyOption;
-                    var correctLastLogOff;
-                    var correctCountry;
+                    let correctRealName, correctCreationTime, correctPersonaState, correctPrivacyOption, correctLastLogOff, correctCountry;
                     //console.debug(summary);
                     correctRealName = summary.realName || "Not provided";
                     if (summary.created == undefined) {
@@ -53,32 +49,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                     } else {
                         correctCreationTime = new Date(summary.created * 1000);
                     };
-                    switch (summary.personaState) {
-                        case 0:
-                            correctPersonaState = "Offline ⚫"
-                            break;
-                        case 1:
-                            correctPersonaState = "Online 🟢"
-                            break;
-                        case 2:
-                            correctPersonaState = "Busy 🔴"
-                            break;
-                        case 3:
-                            correctPersonaState = "Away 🟡"
-                            break;
-                        case 4:
-                            correctPersonaState = "Snooze 🔵"
-                            break;
-                        case 5:
-                            correctPersonaState = "Looking to trade 📦"
-                            break;
-                        case 5:
-                            correctPersonaState = "Looking to play 🎮"
-                            break;
-                        default:
-                            correctPersonaState = "Unknown"
-                            break;
-                    };
+                    correctPersonaState = ["Offline ⚫", "Online 🟢", "Busy 🔴", "Away 🟡", "Snooze 🔵", "Looking to trade 📦", "Looking to play 🎮", "Unknown"][summary.personaState]
                     if (summary.lastLogOff == undefined) {
                         correctLastLogOff = "Unknown";
                     } else {
@@ -154,9 +125,51 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                         }
                     });
                 })
-            });
+                    .catch(error => {
+                        console.error(error);
+                        client.api.interactions(interaction.id, interaction.token).callback.post({
+                            data: {
+                                type: 4,
+                                data: {
+                                    "embeds": [
+                                        {
+                                            color: "47602",
+                                            author: {
+                                                "name": "mist",
+                                                "url": config.webpage
+                                            },
+                                            title: `Something has gone wrong! ⚠️`,
+                                            description: `${error}` //gets the error and sends it
+                                        }
+                                    ]
+                                }
+                            }
+                        });
+                    });
+            })
+                .catch(error => {
+                    client.api.interactions(interaction.id, interaction.token).callback.post({
+                        data: {
+                            type: 4,
+                            data: {
+                                "embeds": [
+                                    {
+                                        color: "47602",
+                                        author: {
+                                            "name": "mist",
+                                            "url": config.webpage
+                                        },
+                                        title: `Something has gone wrong! ⚠️`,
+                                        description: `${error}` //gets the error and sends it
+                                    }
+                                ]
+                            }
+                        }
+                    });
+                });
             break;
-        case 'steamid':
+        }
+        case 'steamid': {
             steam.resolve(interaction.data.options[0].value).then(steamid => { //gets steamid from steamapi lib
                 client.api.interactions(interaction.id, interaction.token).callback.post({
                     data: {
@@ -175,10 +188,31 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                             ]
                         }
                     }
+                })
+            })
+                .catch(error => {
+                    client.api.interactions(interaction.id, interaction.token).callback.post({
+                        data: {
+                            type: 4,
+                            data: {
+                                "embeds": [
+                                    {
+                                        color: "47602",
+                                        author: {
+                                            "name": "mist",
+                                            "url": config.webpage
+                                        },
+                                        title: `Something has gone wrong! ⚠️`,
+                                        description: `${error}` //gets the error and sends it
+                                    }
+                                ]
+                            }
+                        }
+                    });
                 });
-            });
             break;
-        case 'showcase':
+        }
+        case 'showcase': {
             if (client.channels.cache.get(interaction.channel_id).nsfw == true) {
                 steam.resolve(interaction.data.options[0].value).then(id => {
                     steam.getUserSummary(id).then(summary => {
@@ -203,11 +237,31 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                             let screenshot = await page.screenshot({ type: 'png', fullPage: true, encoding: 'buffer' });
                             const attachment = new Discord.MessageAttachment(screenshot, 'screenshot.png'); //take a screenshot and make it a messageattachment
                             await browser.close();
-                            let embed = new Discord.MessageEmbed().setColor('0x00B9F2').setImage('attachment://screenshot.png').setAuthor('mist', '', config.webpage).setTitle(`Steam profile showcase of ${summary.nickname}`);
+                            let embed = new Discord.MessageEmbed().setColor('0x00B9F2').setImage('attachment://screenshot.png').setAuthor('mist', '', config.webpage).setTitle(`Steam profile showcase of ${summary.nickname}`).setFooter('Steam profile showcase');
                             new Discord.WebhookClient(client.user.id, interaction.token).send({ embeds: [embed], files: [attachment] }); //send a followup with the screenshot
                         })();
                     });
-                });
+                })
+                    .catch(error => {
+                        client.api.interactions(interaction.id, interaction.token).callback.post({
+                            data: {
+                                type: 4,
+                                data: {
+                                    "embeds": [
+                                        {
+                                            color: "47602",
+                                            author: {
+                                                "name": "mist",
+                                                "url": config.webpage
+                                            },
+                                            title: `Something has gone wrong! ⚠️`,
+                                            description: `${error}` //gets the error and sends it
+                                        }
+                                    ]
+                                }
+                            }
+                        });
+                    });
             } else if (client.channels.cache.get(interaction.channel_id).nsfw == false) {
                 client.api.interactions(interaction.id, interaction.token).callback.post({
                     data: {
@@ -248,7 +302,50 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                 });
             }
             break;
-        default:
+        }
+        case 'gamestats': { //this looks fucking terrible
+            let URL, gameid, buf;
+            client.api.interactions(interaction.id, interaction.token).callback.post({
+                data: {
+                    type: 5,
+                }
+            });
+            URL = interaction.data.options.find(arg => arg.name === 'url');
+            gameid = interaction.data.options.find(arg => arg.name === 'gameid');
+            console.log(URL);
+            console.log(gameid);
+            steam.resolve(URL.value).then(id => {
+                steam.getUserStats(id, gameid.value).then(playerstats => {
+                    bufStr = JSON.stringify(playerstats.stats, null, '  ');
+                    buf = Buffer.from(bufStr, 'utf8');
+                    const attachment = new Discord.MessageAttachment(buf, 'stats.txt');
+                    let embed = new Discord.MessageEmbed().setColor('0x00B9F2').setAuthor('mist', '', config.webpage).setTitle(`Game stats of user ${id} for game ${gameid.value}`);
+                    new Discord.WebhookClient(client.user.id, interaction.token).send({ embeds: [embed], files: [attachment] }); 
+                });
+            })
+                .catch(error => {
+                    client.api.interactions(interaction.id, interaction.token).callback.post({
+                        data: {
+                            type: 4,
+                            data: {
+                                "embeds": [
+                                    {
+                                        color: "47602",
+                                        author: {
+                                            "name": "mist",
+                                            "url": config.webpage
+                                        },
+                                        title: `Something has gone wrong! ⚠️`,
+                                        description: `${error}` //gets the error and sends it
+                                    }
+                                ]
+                            }
+                        }
+                    });
+                });
+            break;
+        }
+        default: {
             client.api.interactions(interaction.id, interaction.token).callback.post({
                 data: {
                     type: 4,
@@ -268,32 +365,14 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                 }
             });
             break;
+        }
     }
-    process.on('uncaughtException', uncaughtException => { //on the error, lets send an embed with the error message from the lib
-        console.error("Something has gone wrong! " + uncaughtException);
-        client.api.interactions(interaction.id, interaction.token).callback.post({
-            data: {
-                type: 4,
-                data: {
-                    "embeds": [
-                        {
-                            color: "47602",
-                            author: {
-                                "name": "mist",
-                                "url": config.webpage
-                            },
-                            title: `Something has gone wrong! ⚠️`,
-                            description: `${uncaughtException}` //gets the error and sends it
-                        }
-                    ]
-                }
-            }
-        });
-    });
 }
 );
 
-
+process.on('uncaughtException', uncaughtException => { //on the error, lets send an embed with the error message from the lib
+    console.error("Something has gone wrong! " + uncaughtException);
+});
 
 
 client.login(config.token);//logging in

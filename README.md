@@ -15,7 +15,7 @@ You need to do this, otherwise you won't have an option to interact with your in
 `node firstrun.js global`
 
 # TODO:
-- [ ] Eval should probably be removed from main.js and moved to anoter file in repo so it would be used only for debugging
+- [ ] Eval should probably be removed from main.js and moved to another file in repo so it would be used only for debugging
 - [x] Creating a slash command isn't implemented or even explained
 - [x] Error handling (currently bot just crashes if there is an error with steamapi lib)
 - [x] Puppeteer screenshot steam profile showcase
