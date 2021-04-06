@@ -52,24 +52,22 @@ const commands = [
         "name": "gamestats",
         "description": "Displays users game stats",
         "options": [
-          {
-            "type": 3,
-            "name": "URL",
-            "description": "Type in a URL of the profile (can be a steamID too!)",
-            "default": false,
-            "required": true
-          },
-          {
-            "type": 3,
-            "name": "GameID",
-            "description": "Type in a game id (from store page)",
-            "default": false,
-            "required": true
-          }
+            {
+                "type": 3,
+                "name": "URL",
+                "description": "Type in a URL of the profile (can be a steamID too!)",
+                "default": false,
+                "required": true
+            },
+            {
+                "type": 3,
+                "name": "GameID",
+                "description": "Type in a game id (from store page)",
+                "default": false,
+                "required": true
+            }
         ]
-      }
-      
-      
+    }
 ];
 async function main() {
     const args = process.argv.slice(2);
