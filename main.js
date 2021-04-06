@@ -3,7 +3,6 @@ const SteamAPI = require('steamapi'); // api reference: https://github.com/xDimG
 const client = new Discord.Client();
 const config = require('./config.json');
 const puppeteer = require('puppeteer');
-const { setMaxListeners } = require('process');
 
 const steam = new SteamAPI(config.apikeys.steam);
 
@@ -320,7 +319,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                     buf = Buffer.from(bufStr, 'utf8');
                     const attachment = new Discord.MessageAttachment(buf, 'stats.json'); //while json might not be a proper filetype, it looks better on discord
                     let embed = new Discord.MessageEmbed().setColor('0x00B9F2').setAuthor('mist', '', config.webpage).setTitle(`Game stats of user ${id} for game ${gameid.value}`);
-                    new Discord.WebhookClient(client.user.id, interaction.token).send({ embeds: [embed], files: [attachment] }); 
+                    new Discord.WebhookClient(client.user.id, interaction.token).send({ embeds: [embed], files: [attachment] });
                 });
             })
                 .catch(error => {
