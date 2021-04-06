@@ -318,7 +318,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                 steam.getUserStats(id, gameid.value).then(playerstats => {
                     bufStr = JSON.stringify(playerstats.stats, null, '  ');
                     buf = Buffer.from(bufStr, 'utf8');
-                    const attachment = new Discord.MessageAttachment(buf, 'stats.txt');
+                    const attachment = new Discord.MessageAttachment(buf, 'stats.json'); //while json might not be a proper filetype, it looks better on discord
                     let embed = new Discord.MessageEmbed().setColor('0x00B9F2').setAuthor('mist', '', config.webpage).setTitle(`Game stats of user ${id} for game ${gameid.value}`);
                     new Discord.WebhookClient(client.user.id, interaction.token).send({ embeds: [embed], files: [attachment] }); 
                 });
