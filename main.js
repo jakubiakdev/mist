@@ -12,10 +12,12 @@ client.on('ready', () => {
     console.log(`Logged in as a bot: ${client.user.tag}`);
     console.log(`Current ID: ${client.user.id}`);
     console.log(`Bot invite (used for eval and checking nsfw): https://discord.com/oauth2/authorize?client_id=${client.user.id}&scope=bot&permissions=8`);
-    console.log(`Slashcommand invite (recommended): https://discord.com/oauth2/authorize?client_id=${client.user.id}&scope=applications.commands&permissions=8`)
+    console.log(`Slashcommand invite (recommended): https://discord.com/oauth2/authorize?client_id=${client.user.id}&scope=applications.commands`)
     client.user.setPresence({ activity: { type: `COMPETING`, name: `hewwo` }, status: `online` }); //status
 });
 
+
+//todo: Eval should probably be removed from main.js and moved to another file in repo so it would be used only for debugging
 client.on('message', message => {   //eval handling
     const args = message.content.split(" ").slice(1);
 

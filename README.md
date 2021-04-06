@@ -1,21 +1,25 @@
 # Mist
 Discord bot for accessing steam using `steamapi`
+![https://discord.gg/MZhzgdbgsc](https://img.shields.io/discord/828964319764283412?style=for-the-badge)
+Invite: https://discord.com/oauth2/authorize?client_id=826724857936609291&scope=applications.commands
 
-# Features
+## Features
 - Displaying steam profiles
 - Resolving steamID
+- Showcasing steam profiles with screenshots
+- Displaying steam bans for a user
 
-# Registering slashcommands
+# Selfhosting
+
+## Registering slashcommands
 You need to do this, otherwise you won't have an option to interact with your instance
 
-## For a single server
+### For a single server
 `node firstrun.js guild <type in id of your guild>`
 
-## Globally 
+### Globally 
 `node firstrun.js global`
 
-# TODO:
-- [ ] Eval should probably be removed from main.js and moved to another file in repo so it would be used only for debugging
-- [x] Creating a slash command isn't implemented or even explained
-- [x] Error handling (currently bot just crashes if there is an error with steamapi lib)
-- [x] Puppeteer screenshot steam profile showcase
+## How to run:
+1. `npn i`
+2. `node main.js` (If you can, screen is recommended) 
