@@ -1,9 +1,14 @@
 # Mist
-Discord bot for accessing steam using `steamapi`
 
-![https://discord.gg/MZhzgdbgsc](https://img.shields.io/discord/828964319764283412?style=for-the-badge)
+<p align="center"> Discord bot for accessing steam using steamapi</p>
 
-Invite: https://discord.com/oauth2/authorize?client_id=826724857936609291&scope=applications.commands
+<p align="center">
+  <a href="https://discord.gg/MZhzgdbgsc">
+    <img src="https://img.shields.io/discord/828964319764283412?style=for-the-badge">
+  </a>
+</p>
+
+[Invite](https://discord.com/oauth2/authorize?client_id=826724857936609291&scope=applications.commands)
 
 ## Features
 - Displaying steam profiles
