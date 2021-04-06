@@ -304,7 +304,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
             break;
         }
         case 'gamestats': { //this looks fucking terrible
-            let URL, gameid, buf;
+            let URL, gameid, buf, bufStr;
             client.api.interactions(interaction.id, interaction.token).callback.post({
                 data: {
                     type: 5,
@@ -312,8 +312,8 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
             });
             URL = interaction.data.options.find(arg => arg.name === 'url');
             gameid = interaction.data.options.find(arg => arg.name === 'gameid');
-            console.log(URL);
-            console.log(gameid);
+            //console.debug(URL);
+            //console.debug(gameid);
             steam.resolve(URL.value).then(id => {
                 steam.getUserStats(id, gameid.value).then(playerstats => {
                     bufStr = JSON.stringify(playerstats.stats, null, '  ');
