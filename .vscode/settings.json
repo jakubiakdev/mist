@@ -13,6 +13,7 @@
         "slashcommand",
         "steamapi",
         "steamid",
+        "userbans",
         "userstats"
     ]
 }

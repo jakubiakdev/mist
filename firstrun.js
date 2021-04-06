@@ -67,6 +67,19 @@ const commands = [
                 "required": true
             }
         ]
+    },
+    {
+        "name": "bans",
+        "description": "Display user's game and vac bans",
+        "options": [
+            {
+                "type": 3,
+                "name": "URL",
+                "description": "Type in a URL of the profile (can be a steamID too!)",
+                "default": false,
+                "required": true
+            }
+        ]
     }
 ];
 async function main() {

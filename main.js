@@ -11,7 +11,7 @@ client.on('ready', () => {
     console.log('Welcome to Mist');
     console.log(`Logged in as a bot: ${client.user.tag}`);
     console.log(`Current ID: ${client.user.id}`);
-    console.log(`Bot invite (generated from id, should be used only for eval): https://discord.com/oauth2/authorize?client_id=${client.user.id}&scope=bot&permissions=8`);
+    console.log(`Bot invite (used for eval and checking nsfw): https://discord.com/oauth2/authorize?client_id=${client.user.id}&scope=bot&permissions=8`);
     console.log(`Slashcommand invite (recommended): https://discord.com/oauth2/authorize?client_id=${client.user.id}&scope=applications.commands&permissions=8`)
     client.user.setPresence({ activity: { type: `COMPETING`, name: `hewwo` }, status: `online` }); //status
 });
@@ -40,9 +40,8 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
         case 'profile': {
             steam.resolve(interaction.data.options[0].value).then(id => {
                 steam.getUserSummary(id).then(summary => {
-                    let correctRealName, correctCreationTime, correctPersonaState, correctPrivacyOption, correctLastLogOff, correctCountry;
+                    let correctCreationTime, correctPersonaState, correctPrivacyOption, correctLastLogOff, correctCountry;
                     //console.debug(summary);
-                    correctRealName = summary.realName || "Not provided";
                     if (summary.created == undefined) {
                         correctCreationTime = "Unknown";
                     } else {
@@ -91,7 +90,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                                             },
                                             {
                                                 name: "Real name: ",
-                                                value: correctRealName,
+                                                value: summary.realName || "Not provided",
                                                 inline: true
                                             },
                                             {
@@ -320,6 +319,84 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
                     const attachment = new Discord.MessageAttachment(buf, 'stats.json'); //while json might not be a proper filetype, it looks better on discord
                     let embed = new Discord.MessageEmbed().setColor('0x00B9F2').setAuthor('mist', '', config.webpage).setTitle(`Game stats of user ${id} for game ${gameid.value}`);
                     new Discord.WebhookClient(client.user.id, interaction.token).send({ embeds: [embed], files: [attachment] });
+                });
+            })
+                .catch(error => {
+                    client.api.interactions(interaction.id, interaction.token).callback.post({
+                        data: {
+                            type: 4,
+                            data: {
+                                "embeds": [
+                                    {
+                                        color: "47602",
+                                        author: {
+                                            "name": "mist",
+                                            "url": config.webpage
+                                        },
+                                        title: `Something has gone wrong! ⚠️`,
+                                        description: `${error}` //gets the error and sends it
+                                    }
+                                ]
+                            }
+                        }
+                    });
+                });
+            break;
+        }
+        case 'bans': {
+            steam.resolve(interaction.data.options[0].value).then(id => { //gets steamid from steamapi lib
+                steam.getUserSummary(id).then(summary => {
+                    steam.getUserBans(id).then(userbans => {
+                        client.api.interactions(interaction.id, interaction.token).callback.post({
+                            data: {
+                                type: 4,
+                                data: {
+                                    "embeds": [
+                                        {
+                                            color: "47602",
+                                            author: {
+                                                "name": "mist",
+                                                "url": config.webpage
+                                            },
+                                            title: `Game bans of ${summary.nickname}`,
+                                            fields: [
+                                                {
+                                                    name: "Vac Banned?",
+                                                    value: userbans.vacBanned || "Not banned",
+                                                    inline: true
+                                                },
+                                                {
+                                                    name: "Game banned?",
+                                                    value: userbans.gameBanned || "Not banned",
+                                                    inline: true
+                                                },
+                                                {
+                                                    name: "Community Banned?",
+                                                    value: userbans.communityBanned || "Not banned",
+                                                    inline: true
+                                                },
+                                                {
+                                                    name: "Vac bans: ",
+                                                    value: userbans.vacBans,
+                                                    inline: false
+                                                },
+                                                {
+                                                    name: "Game bans: ",
+                                                    value: userbans.gameBans,
+                                                    inline: false
+                                                },
+                                                {
+                                                    name: "Days since last ban:",
+                                                    value: userbans.daysSinceLastBan || "Not banned",
+                                                    inline: false
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        });
+                    });
                 });
             })
                 .catch(error => {
