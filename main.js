@@ -42,87 +42,94 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
         case 'profile': {
             steam.resolve(interaction.data.options[0].value).then(id => {
                 steam.getUserSummary(id).then(summary => {
-                    let correctCreationTime, correctPersonaState, correctPrivacyOption, correctLastLogOff, correctCountry;
-                    //console.debug(summary);
-                    if (summary.created == undefined) {
-                        correctCreationTime = "Unknown";
-                    } else {
-                        correctCreationTime = new Date(summary.created * 1000);
-                    };
-                    correctPersonaState = ["Offline ⚫", "Online 🟢", "Busy 🔴", "Away 🟡", "Snooze 🔵", "Looking to trade 📦", "Looking to play 🎮", "Unknown"][summary.personaState]
-                    if (summary.lastLogOff == undefined) {
-                        correctLastLogOff = "Unknown";
-                    } else {
-                        correctLastLogOff = new Date(summary.lastLogOff * 1000);
-                    };
-                    if (summary.countryCode == undefined) {
-                        correctCountry = "Unknown";
-                    } else {
-                        correctCountry = `:flag_${summary.countryCode.toLowerCase()}:`;
-                    }
-                    if (summary.visibilityState == 3) { correctPrivacyOption = "Public" } else { correctPrivacyOption = "Private" };
-                    client.api.interactions(interaction.id, interaction.token).callback.post({
-                        data: {
-                            type: 4,
-                            data: {
-                                "embeds": [
-                                    {
-                                        color: "47602",
-                                        author: {
-                                            "name": "mist",
-                                            "url": config.webpage
-                                        },
-                                        title: summary.nickname, //get all the fun stuff from steamapi playersummary and sends it as an embed
-                                        thumbnail: { "url": summary.avatar.large },
-                                        fields: [
-                                            {
-                                                name: "Privacy option: ",
-                                                value: correctPrivacyOption,
-                                                inline: false
-                                            },
-                                            {
-                                                name: "Current status: ",
-                                                value: correctPersonaState,
-                                                inline: true
-                                            },
-                                            {
-                                                name: "SteamID: ",
-                                                value: summary.steamID,
-                                                inline: true
-                                            },
-                                            {
-                                                name: "Real name: ",
-                                                value: summary.realName || "Not provided",
-                                                inline: true
-                                            },
-                                            {
-                                                name: "Country: ",
-                                                value: correctCountry,
-                                                inline: true
-                                            },
-                                            {
-                                                name: "URL: ",
-                                                value: summary.url,
-                                                inline: false
-                                            },
-                                            {
-                                                name: "Last online: ",
-                                                value: correctLastLogOff,
-                                                inline: true
-                                            },
-                                            {
-                                                name: "Creation time: ",
-                                                value: correctCreationTime,
-                                                inline: true
-                                            }
-                                        ],
-                                        footer: {
-                                            text: "Steam profile summary"
-                                        }
-                                    }
-                                ]
-                            }
+                    steam.getUserLevel(id).then(level => {
+                        let correctCreationTime, correctPersonaState, correctPrivacyOption, correctLastLogOff, correctCountry;
+                        //console.debug(summary);
+                        if (summary.created == undefined) {
+                            correctCreationTime = "Unknown";
+                        } else {
+                            correctCreationTime = new Date(summary.created * 1000);
+                        };
+                        correctPersonaState = ["Offline ⚫", "Online 🟢", "Busy 🔴", "Away 🟡", "Snooze 🔵", "Looking to trade 📦", "Looking to play 🎮", "Unknown"][summary.personaState]
+                        if (summary.lastLogOff == undefined) {
+                            correctLastLogOff = "Unknown";
+                        } else {
+                            correctLastLogOff = new Date(summary.lastLogOff * 1000);
+                        };
+                        if (summary.countryCode == undefined) {
+                            correctCountry = "Unknown";
+                        } else {
+                            correctCountry = `:flag_${summary.countryCode.toLowerCase()}:`;
                         }
+                        if (summary.visibilityState == 3) { correctPrivacyOption = "Public" } else { correctPrivacyOption = "Private" };
+                        client.api.interactions(interaction.id, interaction.token).callback.post({
+                            data: {
+                                type: 4,
+                                data: {
+                                    "embeds": [
+                                        {
+                                            color: "47602",
+                                            author: {
+                                                "name": "mist",
+                                                "url": config.webpage
+                                            },
+                                            title: summary.nickname, //get all the fun stuff from steamapi playersummary and sends it as an embed
+                                            thumbnail: { "url": summary.avatar.large },
+                                            fields: [
+                                                {
+                                                    name: "Privacy option: ",
+                                                    value: correctPrivacyOption,
+                                                    inline: false
+                                                },
+                                                {
+                                                    name: "Current status: ",
+                                                    value: correctPersonaState,
+                                                    inline: true
+                                                },
+                                                {
+                                                    name: "SteamID: ",
+                                                    value: summary.steamID,
+                                                    inline: true
+                                                },
+                                                {
+                                                    name: "Level: ",
+                                                    value: level || "Unknown",
+                                                    inline: true
+                                                },
+                                                {
+                                                    name: "Real name: ",
+                                                    value: summary.realName || "Not provided",
+                                                    inline: true
+                                                },
+                                                {
+                                                    name: "Country: ",
+                                                    value: correctCountry,
+                                                    inline: true
+                                                },
+                                                {
+                                                    name: "URL: ",
+                                                    value: summary.url,
+                                                    inline: false
+                                                },
+                                                {
+                                                    name: "Last online: ",
+                                                    value: correctLastLogOff,
+                                                    inline: true
+                                                },
+                                                {
+                                                    name: "Creation time: ",
+                                                    value: correctCreationTime,
+                                                    inline: true
+                                                }
+                                            ],
+                                            footer: {
+                                                text: "Steam profile summary"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        });
                     });
                 })
                     .catch(error => {
