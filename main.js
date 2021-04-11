@@ -13,7 +13,7 @@ client.on('ready', () => {
     console.log(`Current ID: ${client.user.id}`);
     console.log(`Bot invite (used for eval and checking nsfw): https://discord.com/oauth2/authorize?client_id=${client.user.id}&scope=bot&permissions=8`);
     console.log(`Slashcommand invite (recommended): https://discord.com/oauth2/authorize?client_id=${client.user.id}&scope=applications.commands`)
-    client.user.setPresence({ activity: { type: `COMPETING`, name: `hewwo` }, status: `online` }); //status
+    client.user.setPresence({ activity: { type: `PLAYING`, name: `On steam` }, status: `online` }); //status
 });
 
 
