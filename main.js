@@ -241,6 +241,10 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 								let dom = document.querySelector('#footer');
 								dom.parentNode.removeChild(dom);
 							})
+							await page.evaluate(() => {
+								let dom = document.querySelector('.profile_comment_area');
+								dom.parentNode.removeChild(dom);
+							}) 
 							let screenshot = await page.screenshot({ type: 'png', fullPage: true, encoding: 'buffer' });
 							const attachment = new Discord.MessageAttachment(screenshot, 'screenshot.png'); //take a screenshot and make it a messageattachment
 							await browser.close();
