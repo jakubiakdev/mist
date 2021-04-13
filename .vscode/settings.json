@@ -8,6 +8,7 @@
         "guildid",
         "messageattachment",
         "ownerid",
+        "playercount",
         "playerstats",
         "playersummary",
         "slashcommand",
