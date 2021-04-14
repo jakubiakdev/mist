@@ -244,7 +244,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 							await page.evaluate(() => {
 								let dom = document.querySelector('.profile_comment_area');
 								dom.parentNode.removeChild(dom);
-							}) 
+							})
 							let screenshot = await page.screenshot({ type: 'png', fullPage: true, encoding: 'buffer' });
 							const attachment = new Discord.MessageAttachment(screenshot, 'screenshot.png'); //take a screenshot and make it a messageattachment
 							await browser.close();
@@ -357,7 +357,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 			break;
 		}
 		case 'playercount': {
-			steam.getGamePlayers(interaction.data.options[0].value).then(playercount => { 
+			steam.getGamePlayers(interaction.data.options[0].value).then(playercount => {
 				client.api.interactions(interaction.id, interaction.token).callback.post({
 					data: {
 						type: 4,
@@ -371,6 +371,75 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 									},
 									title: `Number of people playing game with steamid ${interaction.data.options[0].value}`, //todo: more familiar name
 									description: `${playercount}`
+								}
+							]
+						}
+					}
+				})
+			})
+				.catch(error => {
+					client.api.interactions(interaction.id, interaction.token).callback.post({
+						data: {
+							type: 4,
+							data: {
+								"embeds": [
+									{
+										color: "47602",
+										author: {
+											"name": "mist",
+											"url": config.webpage
+										},
+										title: `Something has gone wrong! ⚠️`,
+										description: `${error}` //gets the error and sends it
+									}
+								]
+							}
+						}
+					});
+				});
+			break;
+		}
+		case 'game': {
+			steam.getGameDetails(interaction.data.options[0].value).then(gameDetails => {
+				console.log(gameDetails);
+				let correctPrice;
+				if (gameDetails.is_free){
+					correctPrice = "Free";
+				}else{
+					correctPrice = gameDetails.price_overview.final_formatted;
+				}
+
+				client.api.interactions(interaction.id, interaction.token).callback.post({
+					data: {
+						type: 4,
+						data: {
+							"embeds": [
+								{
+									color: "47602",
+									author: {
+										"name": "mist",
+										"url": config.webpage
+									},
+									title: `${gameDetails.name}`, //todo: more familiar name
+									description: gameDetails.short_description,
+									image: {url: gameDetails.header_image},
+									fields: [
+										{
+											name: "Price",
+											value: correctPrice,
+											inline: false
+										},
+										{
+											name: "Controller support",
+											value: gameDetails.controller_support || "Unknown",
+											inline: true
+										},
+										{
+											name: "Release date",
+											value: gameDetails.release_date.date,
+											inline: true
+										}
+									]
 								}
 							]
 						}
