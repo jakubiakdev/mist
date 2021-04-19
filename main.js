@@ -220,7 +220,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 			break;
 		}
 		case 'showcase': {
-			if (client.channels.cache.get(interaction.channel_id).nsfw == true) {
+			if (client.channels.cache.get(interaction.channel_id) != undefined && client.channels.cache.get(interaction.channel_id).nsfw == true) {
 				steam.resolve(interaction.data.options[0].value).then(id => {
 					steam.getUserSummary(id).then(summary => {
 						client.api.interactions(interaction.id, interaction.token).callback.post({
@@ -273,7 +273,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 							}
 						});
 					});
-			} else if (client.channels.cache.get(interaction.channel_id).nsfw == false) {
+			} else if (client.channels.cache.get(interaction.channel_id) != undefined && client.channels.cache.get(interaction.channel_id).nsfw == false) {
 				client.api.interactions(interaction.id, interaction.token).callback.post({
 					data: {
 						type: 4,
