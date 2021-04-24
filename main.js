@@ -399,6 +399,101 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 				});
 			break;
 		}
+		case 'game': {
+			let categoriesStr
+			steam.getGameDetails(interaction.data.options[0].value).then(gameDetails => {
+				console.log(gameDetails);
+				let correctPrice;
+				if (gameDetails.is_free) {
+					correctPrice = "Free";
+				} else {
+					correctPrice = gameDetails.price_overview.final_formatted;
+				}
+				gameDetails.categories.forEach(category => {
+					if (!categoriesStr) {
+						categoriesStr = category.description
+					}
+					categoriesStr = categoriesStr + ", " + category.description;
+				});
+				client.api.interactions(interaction.id, interaction.token).callback.post({
+					data: {
+						type: 4,
+						data: {
+							"embeds": [
+								{
+									color: "47602",
+									author: {
+										"name": "mist",
+										"url": config.webpage
+									},
+									title: `${gameDetails.name}`,
+									description: gameDetails.short_description,
+									image: { url: gameDetails.header_image },
+									fields: [
+										{
+											name: "Price",
+											value: correctPrice,
+											inline: false
+										},
+										{
+											name: "Metacritic",
+											value: gameDetails.metacritic.score || "Not listed",
+											inline: true
+										},
+										{
+											name: "Release date",
+											value: gameDetails.release_date.date,
+											inline: true
+										},
+										{
+											name: "Controller support",
+											value: gameDetails.controller_support || "Unknown",
+											inline: true
+										},
+										{
+											name: "Categories:",
+											value: categoriesStr,
+											inline: false
+										},
+										{
+											name: "Developers",
+											value: gameDetails.developers.join(", "),
+											inline: false
+										},
+										{
+											name: "Publishers",
+											value: gameDetails.publishers.join(", "),
+											inline: false
+										}
+									]
+								}
+							]
+						}
+					}
+				})
+			})
+				.catch(error => {
+					client.api.interactions(interaction.id, interaction.token).callback.post({
+						data: {
+							type: 4,
+							data: {
+								"embeds": [
+									{
+										color: "47602",
+										author: {
+											"name": "mist",
+											"url": config.webpage
+										},
+										title: `Something has gone wrong! ⚠️`,
+										description: `${error}` //gets the error and sends it
+									}
+								]
+							}
+						}
+					});
+				});
+			break;
+		}
 		case 'bans': {
 			steam.resolve(interaction.data.options[0].value).then(id => { //gets steamid from steamapi lib
 				steam.getUserSummary(id).then(summary => {
