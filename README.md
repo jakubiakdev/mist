@@ -2,13 +2,9 @@
 
 <p align="center"> Discord bot for accessing steam using steamapi</p>
 
-<p align="center">
-  <a href="https://discord.gg/MZhzgdbgsc">
-    <img src="https://img.shields.io/discord/828964319764283412?style=for-the-badge">
-  </a>
-</p>
+[![Discord server invite](https://img.shields.io/discord/828964319764283412?style=for-the-badge)](https://discord.gg/MZhzgdbgsc)
 
-[Invite](https://discord.com/oauth2/authorize?client_id=826724857936609291&scope=applications.commands)
+[Slashcommand invite](https://discord.com/oauth2/authorize?client_id=826724857936609291&scope=applications.commands)
 
 ## Features
 - Displaying steam profiles
@@ -28,6 +24,7 @@ You need to do this, otherwise you won't have an option to interact with your in
 `node firstrun.js global`
 
 ## How to run:
+0. Remember to check .env!
 1. `npn i`
 2. `node main.js` (If you can, screen is recommended) 
 
