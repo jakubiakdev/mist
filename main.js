@@ -400,15 +400,21 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 			break;
 		}
 		case 'game': {
+			let categoriesStr
 			steam.getGameDetails(interaction.data.options[0].value).then(gameDetails => {
 				console.log(gameDetails);
 				let correctPrice;
-				if (gameDetails.is_free){
+				if (gameDetails.is_free) {
 					correctPrice = "Free";
-				}else{
+				} else {
 					correctPrice = gameDetails.price_overview.final_formatted;
 				}
-
+				gameDetails.categories.forEach(category => {
+					if (!categoriesStr) {
+						categoriesStr = category.description
+					}
+					categoriesStr = categoriesStr + ", " + category.description;
+				});
 				client.api.interactions(interaction.id, interaction.token).callback.post({
 					data: {
 						type: 4,
@@ -420,9 +426,9 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 										"name": "mist",
 										"url": config.webpage
 									},
-									title: `${gameDetails.name}`, //todo: more familiar name
+									title: `${gameDetails.name}`,
 									description: gameDetails.short_description,
-									image: {url: gameDetails.header_image},
+									image: { url: gameDetails.header_image },
 									fields: [
 										{
 											name: "Price",
@@ -430,14 +436,34 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 											inline: false
 										},
 										{
-											name: "Controller support",
-											value: gameDetails.controller_support || "Unknown",
+											name: "Metacritic",
+											value: gameDetails.metacritic.score || "Not listed",
 											inline: true
 										},
 										{
 											name: "Release date",
 											value: gameDetails.release_date.date,
 											inline: true
+										},
+										{
+											name: "Controller support",
+											value: gameDetails.controller_support || "Unknown",
+											inline: true
+										},
+										{
+											name: "Categories:",
+											value: categoriesStr,
+											inline: false
+										},
+										{
+											name: "Developers",
+											value: gameDetails.developers.join(", "),
+											inline: false
+										},
+										{
+											name: "Publishers",
+											value: gameDetails.publishers.join(", "),
+											inline: false
 										}
 									]
 								}
