@@ -6,7 +6,7 @@
     "steamapi": "^2.1.3"
   },
   "name": "mist",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "Discord bot for working with steam api ",
   "main": "main.js",
   "scripts": {
