@@ -244,7 +244,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 							await page.evaluate(() => {
 								let dom = document.querySelector('.profile_comment_area');
 								dom.parentNode.removeChild(dom);
-							}) 
+							})
 							let screenshot = await page.screenshot({ type: 'png', fullPage: true, encoding: 'buffer' });
 							const attachment = new Discord.MessageAttachment(screenshot, 'screenshot.png'); //take a screenshot and make it a messageattachment
 							await browser.close();
@@ -357,7 +357,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 			break;
 		}
 		case 'playercount': {
-			steam.getGamePlayers(interaction.data.options[0].value).then(playercount => { 
+			steam.getGamePlayers(interaction.data.options[0].value).then(playercount => {
 				client.api.interactions(interaction.id, interaction.token).callback.post({
 					data: {
 						type: 4,
