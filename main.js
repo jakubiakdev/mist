@@ -1,10 +1,10 @@
 const Discord = require('discord.js');
 const SteamAPI = require('steamapi'); // api reference: https://github.com/xDimGG/node-steamapi#documentation and https://developer.valvesoftware.com/wiki/Steam_Web_API
-const client = new Discord.Client();
-const config = require('./config.json');
 const puppeteer = require('puppeteer');
+require('dotenv').config();
 
-const steam = new SteamAPI(config.apikeys.steam);
+const steam = new SteamAPI(process.env.STEAMAPI_TOKEN);
+const client = new Discord.Client();
 
 
 client.on('ready', () => {
@@ -22,7 +22,7 @@ client.on('message', message => {   //eval handling
 	const args = message.content.split(" ").slice(1);
 
 	if (message.mentions.has(client.user)) {
-		if (message.author.id !== config.ownerid) return;
+		if (message.author.id !== process.env.OWNERID) return;
 		try {
 			const code = args.join(" ");
 			let evaled = eval(code);
@@ -71,7 +71,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 											color: "47602",
 											author: {
 												"name": "mist",
-												"url": config.webpage
+												"url": process.env.WEBPAGE
 											},
 											title: summary.nickname, //get all the fun stuff from steamapi playersummary and sends it as an embed
 											thumbnail: { "url": summary.avatar.large },
@@ -143,7 +143,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 											color: "47602",
 											author: {
 												"name": "mist",
-												"url": config.webpage
+												"url": process.env.WEBPAGE
 											},
 											title: `Something has gone wrong! ⚠️`,
 											description: `${error}` //gets the error and sends it
@@ -164,7 +164,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 										color: "47602",
 										author: {
 											"name": "mist",
-											"url": config.webpage
+											"url": process.env.WEBPAGE
 										},
 										title: `Something has gone wrong! ⚠️`,
 										description: `${error}` //gets the error and sends it
@@ -187,7 +187,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 									color: "47602",
 									author: {
 										"name": "mist",
-										"url": config.webpage
+										"url": process.env.WEBPAGE
 									},
 									title: `SteamID of ${interaction.data.options[0].value}`,
 									description: `${steamid}` //sends it as an embed
@@ -207,7 +207,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 										color: "47602",
 										author: {
 											"name": "mist",
-											"url": config.webpage
+											"url": process.env.WEBPAGE
 										},
 										title: `Something has gone wrong! ⚠️`,
 										description: `${error}` //gets the error and sends it
@@ -248,7 +248,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 							let screenshot = await page.screenshot({ type: 'png', fullPage: true, encoding: 'buffer' });
 							const attachment = new Discord.MessageAttachment(screenshot, 'screenshot.png'); //take a screenshot and make it a messageattachment
 							await browser.close();
-							let embed = new Discord.MessageEmbed().setColor('0x00B9F2').setImage('attachment://screenshot.png').setAuthor('mist', '', config.webpage).setTitle(`Steam profile showcase of ${summary.nickname}`).setFooter('Steam profile showcase');
+							let embed = new Discord.MessageEmbed().setColor('0x00B9F2').setImage('attachment://screenshot.png').setAuthor('mist', '', process.env.WEBPAGE).setTitle(`Steam profile showcase of ${summary.nickname}`).setFooter('Steam profile showcase');
 							new Discord.WebhookClient(client.user.id, interaction.token).send({ embeds: [embed], files: [attachment] }); //send a followup with the screenshot
 						})();
 					});
@@ -263,7 +263,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 											color: "47602",
 											author: {
 												"name": "mist",
-												"url": config.webpage
+												"url": process.env.WEBPAGE
 											},
 											title: `Something has gone wrong! ⚠️`,
 											description: `${error}` //gets the error and sends it
@@ -283,7 +283,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 									color: "47602",
 									author: {
 										"name": "mist",
-										"url": config.webpage
+										"url": process.env.WEBPAGE
 									},
 									title: `Something went wrong! ⚠️`,
 									description: `You cannot use this command on non-nsfw channels!` //gets the error and sends it
@@ -302,7 +302,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 									color: "47602",
 									author: {
 										"name": "mist",
-										"url": config.webpage
+										"url": process.env.WEBPAGE
 									},
 									title: `Something went wrong! ⚠️`,
 									description: `For this command, bot needs to be [invited](https://discord.com/oauth2/authorize?client_id=${client.user.id}&scope=bot&permissions=1024) (even with minimum permissions) to check if channel is nsfw` //gets the error and sends it
@@ -330,7 +330,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 					bufStr = JSON.stringify(playerstats.stats, null, '  ');
 					buf = Buffer.from(bufStr, 'utf8');
 					const attachment = new Discord.MessageAttachment(buf, 'stats.json'); //while json might not be a proper filetype, it looks better on discord
-					let embed = new Discord.MessageEmbed().setColor('0x00B9F2').setAuthor('mist', '', config.webpage).setTitle(`Game stats of user ${id} for game ${gameid.value}`);
+					let embed = new Discord.MessageEmbed().setColor('0x00B9F2').setAuthor('mist', '', process.env.WEBPAGE).setTitle(`Game stats of user ${id} for game ${gameid.value}`);
 					new Discord.WebhookClient(client.user.id, interaction.token).send({ embeds: [embed], files: [attachment] });
 				});
 			})
@@ -344,7 +344,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 										color: "47602",
 										author: {
 											"name": "mist",
-											"url": config.webpage
+											"url": process.env.WEBPAGE
 										},
 										title: `Something has gone wrong! ⚠️`,
 										description: `${error}` //gets the error and sends it
@@ -367,7 +367,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 									color: "47602",
 									author: {
 										"name": "mist",
-										"url": config.webpage
+										"url": process.env.WEBPAGE
 									},
 									title: `Number of people playing game with steamid ${interaction.data.options[0].value}`, //todo: more familiar name
 									description: `${playercount}`
@@ -387,7 +387,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 										color: "47602",
 										author: {
 											"name": "mist",
-											"url": config.webpage
+											"url": process.env.WEBPAGE
 										},
 										title: `Something has gone wrong! ⚠️`,
 										description: `${error}` //gets the error and sends it
@@ -412,7 +412,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 											color: "47602",
 											author: {
 												"name": "mist",
-												"url": config.webpage
+												"url": process.env.WEBPAGE
 											},
 											title: `Game bans of ${summary.nickname}`,
 											fields: [
@@ -465,7 +465,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 										color: "47602",
 										author: {
 											"name": "mist",
-											"url": config.webpage
+											"url": process.env.WEBPAGE
 										},
 										title: `Something has gone wrong! ⚠️`,
 										description: `${error}` //gets the error and sends it
@@ -487,7 +487,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 								color: "47602",
 								author: {
 									"name": "mist",
-									"url": config.webpage
+									"url": process.env.WEBPAGE
 								},
 								title: `Something went wrong! ⚠️`,
 								description: `${interaction.data.name} is not expected` //gets the error and sends it
@@ -508,4 +508,4 @@ process.on('uncaughtException', uncaughtException => { //on the error, lets send
 });
 
 
-client.login(config.token);//logging in
+client.login();//logging in
