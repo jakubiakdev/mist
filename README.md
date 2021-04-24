@@ -30,3 +30,11 @@ You need to do this, otherwise you won't have an option to interact with your in
 ## How to run:
 1. `npn i`
 2. `node main.js` (If you can, screen is recommended) 
+
+## Common issues
+
+### Failed to launch browser
+`Something has gone wrong! Error: Failed to launch the browser process! spawn /usr/bin/chromium-browser ENOENT`
+
+This is usually caused on linux distros (like archlinux) that have different naming of chromium than puppeteer expects. 
+Easy fix is to uncomment `PUPPETEER_EXECUTABLE_PATH` in .env and change it to `PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium` or different path of your installed browser.
