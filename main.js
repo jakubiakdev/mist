@@ -357,24 +357,26 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 			break;
 		}
 		case 'playercount': {
-			steam.getGamePlayers(interaction.data.options[0].value).then(playercount => {
-				client.api.interactions(interaction.id, interaction.token).callback.post({
-					data: {
-						type: 4,
+			steam.getGameDetails(interaction.data.options[0].value).then(gameDetails => {
+				steam.getGamePlayers(interaction.data.options[0].value).then(playercount => {
+					client.api.interactions(interaction.id, interaction.token).callback.post({
 						data: {
-							"embeds": [
-								{
-									color: "47602",
-									author: {
-										"name": "mist",
-										"url": process.env.WEBPAGE
-									},
-									title: `Number of people playing game with steamid ${interaction.data.options[0].value}`, //todo: more familiar name
-									description: `${playercount}`
-								}
-							]
+							type: 4,
+							data: {
+								"embeds": [
+									{
+										color: "47602",
+										author: {
+											"name": "mist",
+											"url": process.env.WEBPAGE
+										},
+										title: `Number of people playing ${gameDetails.name}`,
+										description: `${playercount}`
+									}
+								]
+							}
 						}
-					}
+					})
 				})
 			})
 				.catch(error => {
