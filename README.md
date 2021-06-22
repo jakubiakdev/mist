@@ -1,16 +1,19 @@
 # Mist
 
-<p align="center"> Discord bot for accessing steam using steamapi</p>
+Discord bot for accessing steam using steamapi
 
 [![Discord server invite](https://img.shields.io/discord/828964319764283412?style=for-the-badge)](https://discord.gg/MZhzgdbgsc)
 
 [Slashcommand invite](https://discord.com/oauth2/authorize?client_id=826724857936609291&scope=applications.commands)
 
 ## Features
-- Displaying steam profiles
-- Resolving steamID
-- Showcasing steam profiles with screenshots
-- Displaying steam bans for a user
+- Display Steam profiles
+- Resole SteamID
+- Showcas Steam profiles with screenshots
+- Display internal Steam game stats for a given user
+- Display Steam bans for a user
+- Display current players for a Steam game
+- Display Steam game's storepage in a chat-friendly format
 
 # Selfhosting
 
