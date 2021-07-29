@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "discord.js": "^12.5.3",
-    "puppeteer": "^10.0.0",
+    "puppeteer": "^10.1.0",
     "dotenv": "^10.0.0",
     "steamapi": "^2.1.3"
   },
