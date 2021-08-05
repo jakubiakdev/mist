@@ -404,7 +404,7 @@ client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
 		case 'game': {
 			let categoriesStr
 			steam.getGameDetails(interaction.data.options[0].value).then(gameDetails => {
-				console.log(gameDetails);
+				// console.log(gameDetails);
 				let correctPrice;
 				if (gameDetails.is_free) {
 					correctPrice = "Free";
