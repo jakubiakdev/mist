@@ -7,6 +7,7 @@ Discord bot for accessing steam using steamapi
 [Slashcommand invite](https://discord.com/oauth2/authorize?client_id=826724857936609291&scope=applications.commands)
 
 ## Features
+
 - Display Steam profiles
 - Resole SteamID
 - Showcas Steam profiles with screenshots
@@ -18,23 +19,28 @@ Discord bot for accessing steam using steamapi
 # Selfhosting
 
 ## Registering slashcommands
+
 You need to do this, otherwise you won't have an option to interact with your instance
 
 ### For a single server
+
 `node firstrun.js guild <type in id of your guild>`
 
-### Globally 
+### Globally
+
 `node firstrun.js global`
 
-## How to run:
+## How to run
+
 0. Remember to check .env!
 1. `npn i`
-2. `node main.js` (If you can, screen is recommended) 
+2. `node main.js` (If you can, screen is recommended)
 
 ## Common issues
 
 ### Failed to launch browser
+
 `Something has gone wrong! Error: Failed to launch the browser process! spawn /usr/bin/chromium-browser ENOENT`
 
-This is usually caused on linux distros (like archlinux) that have different naming of chromium than puppeteer expects. 
+This is usually caused on linux distros (like archlinux) that have different naming of chromium than puppeteer expects.
 Easy fix is to uncomment `PUPPETEER_EXECUTABLE_PATH` in .env and change it to `PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium` or different path of your installed browser.

@@ -2,607 +2,481 @@ const Discord = require('discord.js');
 const SteamAPI = require('steamapi'); // api reference: https://github.com/xDimGG/node-steamapi#documentation and https://developer.valvesoftware.com/wiki/Steam_Web_API
 const puppeteer = require('puppeteer');
 require('dotenv').config();
+const he = require('he');
 
 const steam = new SteamAPI(process.env.STEAMAPI_TOKEN);
-const client = new Discord.Client();
+const client = new Discord.Client({intents: [Discord.Intents.FLAGS.GUILDS]});
 
 
 client.on('ready', () => {
-	console.log('Welcome to Mist');
-	console.log(`Logged in as a bot: ${client.user.tag}`);
-	console.log(`Current ID: ${client.user.id}`);
-	console.log(`Bot invite (used for eval and checking nsfw): https://discord.com/oauth2/authorize?client_id=${client.user.id}&scope=bot&permissions=8`);
-	console.log(`Slashcommand invite (recommended): https://discord.com/oauth2/authorize?client_id=${client.user.id}&scope=applications.commands`)
-	client.user.setPresence({ activity: { type: `PLAYING`, name: `On steam` }, status: `online` }); //status
+  console.log('Welcome to Mist');
+  console.log(`Logged in as a bot: ${client.user.tag}`);
+  console.log(`Current ID: ${client.user.id}`);
+  console.log(`Bot invite (used for eval and checking nsfw): https://discord.com/oauth2/authorize?client_id=${client.user.id}&scope=bot&permissions=8`);
+  console.log(`Slashcommand invite (recommended): https://discord.com/oauth2/authorize?client_id=${client.user.id}&scope=applications.commands`);
+  client.user.setPresence({activity: {type: `PLAYING`, name: `On steam`}, status: `online`}); // status
 });
 
-
-//todo: Eval should probably be removed from main.js and moved to another file in repo so it would be used only for debugging
-client.on('message', message => {   //eval handling
-	const args = message.content.split(" ").slice(1);
-
-	if (message.mentions.has(client.user)) {
-		if (message.author.id !== process.env.OWNERID) return;
-		try {
-			const code = args.join(" ");
-			let evaled = eval(code);
-
-			if (typeof evaled !== "string") {
-				evaled = require("util").inspect(evaled);
-			}
-			message.channel.send(evaled, { code: "xl" });
-		} catch (err) {
-			message.channel.send(`error: ${err} `)
-		}
-	}
-});
-
-client.ws.on('INTERACTION_CREATE', async interaction => { //on slashcommand
-	switch (interaction.data.name) {
-		case 'profile': {
-			steam.resolve(interaction.data.options[0].value).then(id => {
-				steam.getUserSummary(id).then(summary => {
-					steam.getUserLevel(id).then(level => {
-						let correctCreationTime, correctPersonaState, correctPrivacyOption, correctLastLogOff, correctCountry;
-						//console.debug(summary);
-						if (summary.created == undefined) {
-							correctCreationTime = "Unknown";
-						} else {
-							correctCreationTime = new Date(summary.created * 1000);
-						};
-						correctPersonaState = ["Offline ⚫", "Online 🟢", "Busy 🔴", "Away 🟡", "Snooze 🔵", "Looking to trade 📦", "Looking to play 🎮", "Unknown"][summary.personaState]
-						if (summary.lastLogOff == undefined) {
-							correctLastLogOff = "Unknown";
-						} else {
-							correctLastLogOff = new Date(summary.lastLogOff * 1000);
-						};
-						if (summary.countryCode == undefined) {
-							correctCountry = "Unknown";
-						} else {
-							correctCountry = `:flag_${summary.countryCode.toLowerCase()}:`;
-						}
-						if (summary.visibilityState == 3) { correctPrivacyOption = "Public" } else { correctPrivacyOption = "Private" };
-						client.api.interactions(interaction.id, interaction.token).callback.post({
-							data: {
-								type: 4,
-								data: {
-									"embeds": [
-										{
-											color: "47602",
-											author: {
-												"name": "mist",
-												"url": process.env.WEBPAGE
-											},
-											title: summary.nickname, //get all the fun stuff from steamapi playersummary and sends it as an embed
-											thumbnail: { "url": summary.avatar.large },
-											fields: [
-												{
-													name: "Privacy option: ",
-													value: correctPrivacyOption,
-													inline: false
-												},
-												{
-													name: "Current status: ",
-													value: correctPersonaState,
-													inline: true
-												},
-												{
-													name: "SteamID: ",
-													value: summary.steamID,
-													inline: true
-												},
-												{
-													name: "Level: ",
-													value: level || "Unknown",
-													inline: true
-												},
-												{
-													name: "Real name: ",
-													value: summary.realName || "Not provided",
-													inline: true
-												},
-												{
-													name: "Country: ",
-													value: correctCountry,
-													inline: true
-												},
-												{
-													name: "URL: ",
-													value: summary.url,
-													inline: false
-												},
-												{
-													name: "Last online: ",
-													value: correctLastLogOff,
-													inline: true
-												},
-												{
-													name: "Creation time: ",
-													value: correctCreationTime,
-													inline: true
-												}
-											],
-											footer: {
-												text: "Steam profile summary"
-											}
-										}
-									]
-								}
-							}
-						});
-					});
-				})
-					.catch(error => {
-						console.error(error);
-						client.api.interactions(interaction.id, interaction.token).callback.post({
-							data: {
-								type: 4,
-								data: {
-									"embeds": [
-										{
-											color: "47602",
-											author: {
-												"name": "mist",
-												"url": process.env.WEBPAGE
-											},
-											title: `Something has gone wrong! ⚠️`,
-											description: `${error}` //gets the error and sends it
-										}
-									]
-								}
-							}
-						});
-					});
-			})
-				.catch(error => {
-					client.api.interactions(interaction.id, interaction.token).callback.post({
-						data: {
-							type: 4,
-							data: {
-								"embeds": [
-									{
-										color: "47602",
-										author: {
-											"name": "mist",
-											"url": process.env.WEBPAGE
-										},
-										title: `Something has gone wrong! ⚠️`,
-										description: `${error}` //gets the error and sends it
-									}
-								]
-							}
-						}
-					});
-				});
-			break;
-		}
-		case 'steamid': {
-			steam.resolve(interaction.data.options[0].value).then(steamid => { //gets steamid from steamapi lib
-				client.api.interactions(interaction.id, interaction.token).callback.post({
-					data: {
-						type: 4,
-						data: {
-							"embeds": [
-								{
-									color: "47602",
-									author: {
-										"name": "mist",
-										"url": process.env.WEBPAGE
-									},
-									title: `SteamID of ${interaction.data.options[0].value}`,
-									description: `${steamid}` //sends it as an embed
-								}
-							]
-						}
-					}
-				})
-			})
-				.catch(error => {
-					client.api.interactions(interaction.id, interaction.token).callback.post({
-						data: {
-							type: 4,
-							data: {
-								"embeds": [
-									{
-										color: "47602",
-										author: {
-											"name": "mist",
-											"url": process.env.WEBPAGE
-										},
-										title: `Something has gone wrong! ⚠️`,
-										description: `${error}` //gets the error and sends it
-									}
-								]
-							}
-						}
-					});
-				});
-			break;
-		}
-		case 'showcase': {
-			if (client.channels.cache.get(interaction.channel_id) != undefined && client.channels.cache.get(interaction.channel_id).nsfw == true) {
-				steam.resolve(interaction.data.options[0].value).then(id => {
-					steam.getUserSummary(id).then(summary => {
-						client.api.interactions(interaction.id, interaction.token).callback.post({
-							data: {
-								type: 5,
-							}
-						});
-						(async () => {
-							const browser = await puppeteer.launch({ defaultViewport: { width: 1920, height: 1080 }, headless: true });
-							const page = await browser.newPage();
-							page.setJavaScriptEnabled(false);
-							await page.goto(`https://steamcommunity.com/profiles/${summary.steamID}`); //go to profile page
-							await page.evaluate(() => {
-								let dom = document.querySelector('#global_header'); //remove top and bottom bars from steam page
-								dom.parentNode.removeChild(dom);
-							});
-							await page.evaluate(() => {
-								let dom = document.querySelector('#footer');
-								dom.parentNode.removeChild(dom);
-							})
-							await page.evaluate(() => {
-								let dom = document.querySelector('.profile_comment_area');
-								dom.parentNode.removeChild(dom);
-							})
-							let screenshot = await page.screenshot({ type: 'png', fullPage: true, encoding: 'buffer' });
-							const attachment = new Discord.MessageAttachment(screenshot, 'screenshot.png'); //take a screenshot and make it a messageattachment
-							await browser.close();
-							let embed = new Discord.MessageEmbed().setColor('0x00B9F2').setImage('attachment://screenshot.png').setAuthor('mist', '', process.env.WEBPAGE).setTitle(`Steam profile showcase of ${summary.nickname}`).setFooter('Steam profile showcase');
-							new Discord.WebhookClient(client.user.id, interaction.token).send({ embeds: [embed], files: [attachment] }); //send a followup with the screenshot
-						})();
-					});
-				})
-					.catch(error => {
-						client.api.interactions(interaction.id, interaction.token).callback.post({
-							data: {
-								type: 4,
-								data: {
-									"embeds": [
-										{
-											color: "47602",
-											author: {
-												"name": "mist",
-												"url": process.env.WEBPAGE
-											},
-											title: `Something has gone wrong! ⚠️`,
-											description: `${error}` //gets the error and sends it
-										}
-									]
-								}
-							}
-						});
-					});
-			} else if (client.channels.cache.get(interaction.channel_id) != undefined && client.channels.cache.get(interaction.channel_id).nsfw == false) {
-				client.api.interactions(interaction.id, interaction.token).callback.post({
-					data: {
-						type: 4,
-						data: {
-							"embeds": [
-								{
-									color: "47602",
-									author: {
-										"name": "mist",
-										"url": process.env.WEBPAGE
-									},
-									title: `Something went wrong! ⚠️`,
-									description: `You cannot use this command on non-nsfw channels!` //gets the error and sends it
-								}
-							]
-						}
-					}
-				});
-			} else {
-				client.api.interactions(interaction.id, interaction.token).callback.post({
-					data: {
-						type: 4,
-						data: {
-							"embeds": [
-								{
-									color: "47602",
-									author: {
-										"name": "mist",
-										"url": process.env.WEBPAGE
-									},
-									title: `Something went wrong! ⚠️`,
-									description: `For this command, bot needs to be [invited](https://discord.com/oauth2/authorize?client_id=${client.user.id}&scope=bot&permissions=1024) (even with minimum permissions) to check if channel is nsfw` //gets the error and sends it
-								}
-							]
-						}
-					}
-				});
-			}
-			break;
-		}
-		case 'gamestats': { //this looks fucking terrible
-			let URL, gameid, buf, bufStr;
-			client.api.interactions(interaction.id, interaction.token).callback.post({
-				data: {
-					type: 5,
-				}
-			});
-			URL = interaction.data.options.find(arg => arg.name === 'url');
-			gameid = interaction.data.options.find(arg => arg.name === 'gameid');
-			//console.debug(URL);
-			//console.debug(gameid);
-			steam.resolve(URL.value).then(id => {
-				steam.getUserStats(id, gameid.value).then(playerstats => {
-					bufStr = JSON.stringify(playerstats.stats, null, '  ');
-					buf = Buffer.from(bufStr, 'utf8');
-					const attachment = new Discord.MessageAttachment(buf, 'stats.json'); //while json might not be a proper filetype, it looks better on discord
-					let embed = new Discord.MessageEmbed().setColor('0x00B9F2').setAuthor('mist', '', process.env.WEBPAGE).setTitle(`Game stats of user ${id} for game ${gameid.value}`);
-					new Discord.WebhookClient(client.user.id, interaction.token).send({ embeds: [embed], files: [attachment] });
-				});
-			})
-				.catch(error => {
-					client.api.interactions(interaction.id, interaction.token).callback.post({
-						data: {
-							type: 4,
-							data: {
-								"embeds": [
-									{
-										color: "47602",
-										author: {
-											"name": "mist",
-											"url": process.env.WEBPAGE
-										},
-										title: `Something has gone wrong! ⚠️`,
-										description: `${error}` //gets the error and sends it
-									}
-								]
-							}
-						}
-					});
-				});
-			break;
-		}
-		case 'playercount': {
-			steam.getGameDetails(interaction.data.options[0].value).then(gameDetails => {
-				steam.getGamePlayers(interaction.data.options[0].value).then(playercount => {
-					client.api.interactions(interaction.id, interaction.token).callback.post({
-						data: {
-							type: 4,
-							data: {
-								"embeds": [
-									{
-										color: "47602",
-										author: {
-											"name": "mist",
-											"url": process.env.WEBPAGE
-										},
-										title: `Number of people playing ${gameDetails.name}`,
-										description: `${playercount}`
-									}
-								]
-							}
-						}
-					})
-				})
-			})
-				.catch(error => {
-					client.api.interactions(interaction.id, interaction.token).callback.post({
-						data: {
-							type: 4,
-							data: {
-								"embeds": [
-									{
-										color: "47602",
-										author: {
-											"name": "mist",
-											"url": process.env.WEBPAGE
-										},
-										title: `Something has gone wrong! ⚠️`,
-										description: `${error}` //gets the error and sends it
-									}
-								]
-							}
-						}
-					});
-				});
-			break;
-		}
-		case 'game': {
-			let categoriesStr
-			steam.getGameDetails(interaction.data.options[0].value).then(gameDetails => {
-				// console.log(gameDetails);
-				let correctPrice;
-				if (gameDetails.is_free) {
-					correctPrice = "Free";
-				} else {
-					correctPrice = gameDetails.price_overview.final_formatted;
-				}
-				gameDetails.categories.forEach(category => {
-					if (!categoriesStr) {
-						categoriesStr = category.description
-					}
-					categoriesStr = categoriesStr + ", " + category.description;
-				});
-				client.api.interactions(interaction.id, interaction.token).callback.post({
-					data: {
-						type: 4,
-						data: {
-							"embeds": [
-								{
-									color: "47602",
-									author: {
-										"name": "mist",
-										"url": config.webpage
-									},
-									title: `${gameDetails.name}`,
-									description: gameDetails.short_description,
-									image: { url: gameDetails.header_image },
-									fields: [
-										{
-											name: "Price",
-											value: correctPrice,
-											inline: false
-										},
-										{
-											name: "Metacritic",
-											value: gameDetails.metacritic.score || "Not listed",
-											inline: true
-										},
-										{
-											name: "Release date",
-											value: gameDetails.release_date.date,
-											inline: true
-										},
-										{
-											name: "Controller support",
-											value: gameDetails.controller_support || "Unknown",
-											inline: true
-										},
-										{
-											name: "Categories:",
-											value: categoriesStr,
-											inline: false
-										},
-										{
-											name: "Developers",
-											value: gameDetails.developers.join(", "),
-											inline: false
-										},
-										{
-											name: "Publishers",
-											value: gameDetails.publishers.join(", "),
-											inline: false
-										}
-									]
-								}
-							]
-						}
-					}
-				})
-			})
-				.catch(error => {
-					client.api.interactions(interaction.id, interaction.token).callback.post({
-						data: {
-							type: 4,
-							data: {
-								"embeds": [
-									{
-										color: "47602",
-										author: {
-											"name": "mist",
-											"url": config.webpage
-										},
-										title: `Something has gone wrong! ⚠️`,
-										description: `${error}` //gets the error and sends it
-									}
-								]
-							}
-						}
-					});
-				});
-			break;
-		}
-		case 'bans': {
-			steam.resolve(interaction.data.options[0].value).then(id => { //gets steamid from steamapi lib
-				steam.getUserSummary(id).then(summary => {
-					steam.getUserBans(id).then(userbans => {
-						client.api.interactions(interaction.id, interaction.token).callback.post({
-							data: {
-								type: 4,
-								data: {
-									"embeds": [
-										{
-											color: "47602",
-											author: {
-												"name": "mist",
-												"url": process.env.WEBPAGE
-											},
-											title: `Game bans of ${summary.nickname}`,
-											fields: [
-												{
-													name: "Vac Banned?",
-													value: userbans.vacBanned || "Not banned",
-													inline: true
-												},
-												{
-													name: "Game banned?",
-													value: userbans.gameBanned || "Not banned",
-													inline: true
-												},
-												{
-													name: "Community Banned?",
-													value: userbans.communityBanned || "Not banned",
-													inline: true
-												},
-												{
-													name: "Vac bans: ",
-													value: userbans.vacBans,
-													inline: false
-												},
-												{
-													name: "Game bans: ",
-													value: userbans.gameBans,
-													inline: false
-												},
-												{
-													name: "Days since last ban:",
-													value: userbans.daysSinceLastBan || "Not banned",
-													inline: false
-												}
-											]
-										}
-									]
-								}
-							}
-						});
-					});
-				});
-			})
-				.catch(error => {
-					client.api.interactions(interaction.id, interaction.token).callback.post({
-						data: {
-							type: 4,
-							data: {
-								"embeds": [
-									{
-										color: "47602",
-										author: {
-											"name": "mist",
-											"url": process.env.WEBPAGE
-										},
-										title: `Something has gone wrong! ⚠️`,
-										description: `${error}` //gets the error and sends it
-									}
-								]
-							}
-						}
-					});
-				});
-			break;
-		}
-		default: {
-			client.api.interactions(interaction.id, interaction.token).callback.post({
-				data: {
-					type: 4,
-					data: {
-						"embeds": [
-							{
-								color: "47602",
-								author: {
-									"name": "mist",
-									"url": process.env.WEBPAGE
-								},
-								title: `Something went wrong! ⚠️`,
-								description: `${interaction.data.name} is not expected` //gets the error and sends it
-							}
-						]
-					}
-				}
-			});
-			console.error(`Slashcommand "${interaction.data.name}" was not expected!`);
-			break;
-		}
-	}
-}
+client.on('interactionCreate', async (interaction) => { // on slashcommand
+  switch (interaction.commandName) {
+    case 'profile': {
+      steam.resolve(interaction.options.getString('url')).then((id) => {
+        steam.getUserSummary(id).then((summary) => {
+          steam.getUserLevel(id).then((level) => {
+            interaction.reply({
+              embeds: [
+                {
+                  color: process.env.COLOR,
+                  author: {
+                    'name': 'mist',
+                    'url': process.env.WEBPAGE,
+                  },
+                  title: summary.nickname, // get all the fun stuff from steamapi playersummary and sends it as an embed
+                  thumbnail: {'url': summary.avatar.large},
+                  fields: [
+                    {
+                      name: 'Privacy option: ',
+                      value: summary.visibilityState == 3 ? 'Public' : 'Private',
+                      inline: false,
+                    },
+                    {
+                      name: 'Current status: ',
+                      value: ['Offline ⚫', 'Online 🟢', 'Busy 🔴', 'Away 🟡', 'Snooze 🔵', 'Looking to trade 📦', 'Looking to play 🎮', 'Unknown'][summary.personaState],
+                      inline: true,
+                    },
+                    {
+                      name: 'SteamID: ',
+                      value: summary.steamID,
+                      inline: true,
+                    },
+                    {
+                      name: 'Level: ',
+                      value: level.toString() || 'Unknown',
+                      inline: true,
+                    },
+                    {
+                      name: 'Real name: ',
+                      value: summary.realName || 'Not provided',
+                      inline: true,
+                    },
+                    {
+                      name: 'Country: ',
+                      value: summary.countryCode == undefined ? 'Unknown' : `:flag_${summary.countryCode.toLowerCase()}:`,
+                      inline: true,
+                    },
+                    {
+                      name: 'URL: ',
+                      value: summary.url,
+                      inline: false,
+                    },
+                    {
+                      name: 'Last online: ',
+                      value: summary.lastLogOff == undefined ? 'Unknown' : new Date(summary.lastLogOff * 1000).toString(),
+                      inline: true,
+                    },
+                    {
+                      name: 'Creation time: ',
+                      value: summary.created == undefined ? 'Unknown' : new Date(summary.created * 1000).toString(),
+                      inline: true,
+                    },
+                  ],
+                  footer: {
+                    text: 'Steam profile summary',
+                  },
+                },
+              ],
+            });
+          });
+        })
+            .catch((error) => {
+              interaction.reply({
+                embeds: [
+                  {
+                    color: process.env.COLOR,
+                    author: {
+                      'name': 'mist',
+                      'url': process.env.WEBPAGE,
+                    },
+                    title: `Something has gone wrong! ⚠️`,
+                    description: `${error}`,
+                  },
+                ],
+                ephemeral: true,
+              });
+            });
+      })
+          .catch((error) => {
+            interaction.reply({
+              embeds: [
+                {
+                  color: process.env.COLOR,
+                  author: {
+                    'name': 'mist',
+                    'url': process.env.WEBPAGE,
+                  },
+                  title: `Something has gone wrong! ⚠️`,
+                  description: `${error}`,
+                },
+              ],
+              ephemeral: true,
+            });
+          });
+      break;
+    }
+    case 'steamid': {
+      const url = interaction.options.getString('url');
+      steam.resolve(url).then((steamid) => { // gets steamid from steamapi lib
+        interaction.reply({
+          embeds: [
+            {
+              color: process.env.COLOR,
+              author: {
+                'name': 'mist',
+                'url': process.env.WEBPAGE,
+              },
+              title: `SteamID of ${url}`,
+              description: `${steamid}`,
+            },
+          ],
+        });
+      })
+          .catch((error) => {
+            interaction.reply({
+              embeds: [
+                {
+                  color: process.env.COLOR,
+                  author: {
+                    'name': 'mist',
+                    'url': process.env.WEBPAGE,
+                  },
+                  title: `Something has gone wrong! ⚠️`,
+                  description: `${error}`,
+                },
+              ],
+              ephemeral: true,
+            });
+          });
+      break;
+    }
+    case 'showcase': {
+      if (client.channels.cache.get(interaction.channelId) != undefined && client.channels.cache.get(interaction.channelId).nsfw == true) {
+        steam.resolve(interaction.options.getString('url')).then((id) => {
+          steam.getUserSummary(id).then((summary) => {
+            interaction.deferReply();
+            (async () => {
+              const browser = await puppeteer.launch({defaultViewport: {width: 1920, height: 1080}, headless: true});
+              const page = await browser.newPage();
+              page.setJavaScriptEnabled(false);
+              await page.goto(`https://steamcommunity.com/profiles/${summary.steamID}`); // go to profile page
+              await page.evaluate(() => {
+                const dom = document.querySelector('#global_header'); // remove top and bottom bars from steam page
+                dom.parentNode.removeChild(dom);
+              });
+              await page.evaluate(() => {
+                const dom = document.querySelector('#footer');
+                dom.parentNode.removeChild(dom);
+              });
+              await page.evaluate(() => {
+                const dom = document.querySelector('.profile_comment_area');
+                dom.parentNode.removeChild(dom);
+              });
+              const screenshot = await page.screenshot({type: 'png', fullPage: true, encoding: 'buffer'});
+              const attachment = new Discord.MessageAttachment(screenshot, 'screenshot.png'); // take a screenshot and make it a messageattachment
+              await browser.close();
+              const embed = new Discord.MessageEmbed().setColor('0x00B9F2').setImage('attachment://screenshot.png').setAuthor('mist', '', process.env.WEBPAGE).setTitle(`Steam profile showcase of ${summary.nickname}`).setFooter('Steam profile showcase');
+              interaction.followUp({embeds: [embed], files: [attachment]}); // send a followup with the screenshot
+            })();
+          });
+        })
+            .catch((error) => {
+              interaction.reply({
+                embeds: [
+                  {
+                    color: process.env.COLOR,
+                    author: {
+                      'name': 'mist',
+                      'url': process.env.WEBPAGE,
+                    },
+                    title: `Something has gone wrong! ⚠️`,
+                    description: `${error}`,
+                  },
+                ],
+                ephemeral: true,
+              });
+            });
+      } else if (client.channels.cache.get(interaction.channelId) != undefined && client.channels.cache.get(interaction.channelId).nsfw == false) {
+        interaction.reply({
+          embeds: [
+            {
+              color: process.env.COLOR,
+              author: {
+                'name': 'mist',
+                'url': process.env.WEBPAGE,
+              },
+              title: `Something went wrong! ⚠️`,
+              description: `You cannot use this command on non-nsfw channels!`,
+            },
+          ],
+          ephemeral: true,
+        });
+      } else {
+        interaction.reply({
+          embeds: [
+            {
+              color: process.env.COLOR,
+              author: {
+                'name': 'mist',
+                'url': process.env.WEBPAGE,
+              },
+              title: `Something went wrong! ⚠️`,
+              description: `For this command, bot needs to be [invited](https://discord.com/oauth2/authorize?client_id=${client.user.id}&scope=bot&permissions=1024) (even with minimum permissions) to check if channel is nsfw`,
+            },
+          ],
+        });
+      }
+      break;
+    }
+    case 'gamestats': { // this looks fucking terrible
+      interaction.deferReply();
+      steam.resolve(interaction.options.getString('url')).then((id) => {
+        steam.getUserStats(id, interaction.options.getString('gameid')).then((playerstats) => {
+          const attachment = new Discord.MessageAttachment(Buffer.from(JSON.stringify(playerstats.stats, null, '  '), 'utf8'), 'stats.json'); // while json might not be a proper filetype, it looks better on discord
+          const embed = new Discord.MessageEmbed().setColor('0x00B9F2').setAuthor('mist', '', process.env.WEBPAGE).setTitle(`Game stats of user ${id} for game ${gameid.value}`);
+          interaction.followUp({embeds: [embed], files: [attachment]});
+        });
+      })
+          .catch((error) => {
+            interaction.followUp({
+              embeds: [
+                {
+                  color: process.env.COLOR,
+                  author: {
+                    'name': 'mist',
+                    'url': process.env.WEBPAGE,
+                  },
+                  title: `Something has gone wrong! ⚠️`,
+                  description: `${error}`,
+                },
+              ],
+              ephemeral: true,
+            });
+          });
+      break;
+    }
+    case 'playercount': {
+      steam.getGameDetails(interaction.options.getInteger('gameid')).then((gameDetails) => {
+        steam.getGamePlayers(interaction.options.getInteger('gameid')).then((playercount) => {
+          interaction.reply({
+            embeds: [
+              {
+                color: process.env.COLOR,
+                author: {
+                  'name': 'mist',
+                  'url': process.env.WEBPAGE,
+                },
+                title: `Number of people playing ${gameDetails.name}`,
+                description: `${playercount}`,
+              },
+            ],
+          });
+        })
+            .catch((error) => {
+              interaction.reply({
+                embeds: [
+                  {
+                    color: process.env.COLOR,
+                    author: {
+                      'name': 'mist',
+                      'url': process.env.WEBPAGE,
+                    },
+                    title: `Something has gone wrong! ⚠️`,
+                    description: `${error}`,
+                  },
+                ],
+                ephemeral: true,
+              });
+            });
+      }).catch((error) => {
+        interaction.reply({
+          embeds: [
+            {
+              color: process.env.COLOR,
+              author: {
+                'name': 'mist',
+                'url': process.env.WEBPAGE,
+              },
+              title: `Something has gone wrong! ⚠️`,
+              description: `${error}`,
+            },
+          ],
+          ephemeral: true,
+        });
+      });
+      break;
+    }
+    case 'game': {
+      steam.getGameDetails(interaction.options.getInteger('gameid')).then((gameDetails) => {
+        interaction.reply({
+          embeds: [
+            {
+              color: process.env.COLOR,
+              author: {
+                'name': 'mist',
+                'url': process.env.WEBPAGE,
+              },
+              title: `${gameDetails.name}`,
+              description: he.decode(gameDetails.short_description),
+              image: {url: gameDetails.header_image},
+              fields: [
+                {
+                  name: 'Price',
+                  value: gameDetails.is_free ? 'Free' : gameDetails.price_overview.final_formatted,
+                  inline: false,
+                },
+                {
+                  name: 'Metacritic',
+                  value: gameDetails.metacritic?.score.toString() || 'Not Listed', // js is weird
+                  inline: true,
+                },
+                {
+                  name: 'Release date',
+                  value: gameDetails.release_date.date,
+                  inline: true,
+                },
+                {
+                  name: 'Controller support',
+                  value: gameDetails.controller_support || 'Unknown',
+                  inline: true,
+                },
+                {
+                  name: 'Categories:',
+                  value: gameDetails.categories.map((category) => category.description).join(', '),
+                  inline: false,
+                },
+                {
+                  name: 'Developers',
+                  value: gameDetails.developers.join(', '),
+                  inline: false,
+                },
+                {
+                  name: 'Publishers',
+                  value: gameDetails.publishers.join(', '),
+                  inline: false,
+                },
+              ]}]});
+      })
+          .catch((error) => {
+            interaction.reply({
+              embeds: [
+                {
+                  color: process.env.COLOR,
+                  author: {
+                    'name': 'mist',
+                    'url': process.env.WEBPAGE,
+                  },
+                  title: `Something has gone wrong! ⚠️`,
+                  description: `${error}`,
+                },
+              ],
+              ephemeral: true,
+            });
+          });
+      break;
+    }
+    case 'bans': {
+      steam.resolve(interaction.options.getString('url')).then((id) => { // gets steamid from steamapi lib
+        steam.getUserSummary(id).then((summary) => {
+          steam.getUserBans(id).then((userbans) => {
+            interaction.reply({
+              embeds: [
+                {
+                  color: process.env.COLOR,
+                  author: {
+                    'name': 'mist',
+                    'url': process.env.WEBPAGE,
+                  },
+                  title: `Game bans of ${summary.nickname}`,
+                  fields: [
+                    {
+                      name: 'Vac Banned?',
+                      value: userbans.vacBanned == undefined ? 'Not Banned' : 'Banned',
+                      inline: true,
+                    },
+                    {
+                      name: 'Game banned?',
+                      value: userbans.gameBanned == undefined ? 'Not Banned' : 'Banned',
+                      inline: true,
+                    },
+                    {
+                      name: 'Community Banned?',
+                      value: userbans.communityBanned == undefined ? 'Not Banned' : 'Banned',
+                      inline: true,
+                    },
+                    {
+                      name: 'Vac bans: ',
+                      value: userbans.vacBans.toString(),
+                      inline: false,
+                    },
+                    {
+                      name: 'Game bans: ',
+                      value: userbans.gameBans.toString(),
+                      inline: false,
+                    },
+                    {
+                      name: 'Days since last ban:',
+                      value: userbans.daysSinceLastBan == undefined ? 'Not Banned' : userbans.daysSinceLastBan.toString(),
+                      inline: false,
+                    },
+                  ],
+                },
+              ],
+            });
+          });
+        });
+      })
+          .catch((error) => {
+            interaction.reply({
+              embeds: [
+                {
+                  color: process.env.COLOR,
+                  author: {
+                    'name': 'mist',
+                    'url': process.env.WEBPAGE,
+                  },
+                  title: `Something has gone wrong! ⚠️`,
+                  description: `${error}`,
+                },
+              ],
+              ephemeral: true,
+            });
+          });
+      break;
+    }
+    default: {
+      interaction.reply({
+        embeds: [
+          {
+            color: process.env.COLOR,
+            author: {
+              'name': 'mist',
+              'url': process.env.WEBPAGE,
+            },
+            title: `Something went wrong! ⚠️`,
+            description: `${interaction.commandName} is not expected`,
+          },
+        ],
+        ephemeral: true,
+      });
+    }
+      console.error(`Slashcommand "${interaction.commandName}" was not expected!`);
+      break;
+  }
+},
 );
 
-process.on('uncaughtException', uncaughtException => { //on the error, lets send an embed with the error message from the lib
-	console.error("Something has gone wrong! " + uncaughtException);
+process.on('uncaughtException', (uncaughtException) => { // do not let the process crash, instead let's just log it
+  console.error('Something has gone wrong! ' + uncaughtException);
 });
 
 
-client.login();//logging in
+client.login();// logging in
