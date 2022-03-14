@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/jakubiakdev/mist#readme",
   "devDependencies": {
-    "eslint": "^8.7.0",
+    "eslint": "^8.11.0",
     "eslint-config-google": "^0.14.0"
   }
 }
