@@ -236,33 +236,33 @@ client.on('interactionCreate', async (interaction) => { // on slashcommand
       }
       break;
     }
-    case 'gamestats': { // this looks fucking terrible
-      interaction.deferReply();
-      steam.resolve(interaction.options.getString('url')).then((id) => {
-        steam.getUserStats(id, interaction.options.getString('gameid')).then((playerstats) => {
-          const attachment = new Discord.MessageAttachment(Buffer.from(JSON.stringify(playerstats.stats, null, '  '), 'utf8'), 'stats.json'); // while json might not be a proper filetype, it looks better on discord
-          const embed = new Discord.MessageEmbed().setColor('0x00B9F2').setAuthor('mist', '', process.env.WEBPAGE).setTitle(`Game stats of user ${id} for game ${gameid.value}`);
-          interaction.followUp({embeds: [embed], files: [attachment]});
-        });
-      })
-          .catch((error) => {
-            interaction.followUp({
-              embeds: [
-                {
-                  color: process.env.COLOR,
-                  author: {
-                    'name': 'mist',
-                    'url': process.env.WEBPAGE,
-                  },
-                  title: `Something has gone wrong! ⚠️`,
-                  description: `${error}`,
-                },
-              ],
-              ephemeral: true,
-            });
-          });
-      break;
-    }
+    // case 'gamestats': { // this looks fucking terrible
+    //   interaction.deferReply();
+    //   steam.resolve(interaction.options.getString('url')).then((id) => {
+    //     steam.getUserStats(id, interaction.options.getString('gameid')).then((playerstats) => {
+    //       const attachment = new Discord.MessageAttachment(Buffer.from(JSON.stringify(playerstats.stats, null, '  '), 'utf8'), 'stats.json'); // while json might not be a proper filetype, it looks better on discord
+    //       const embed = new Discord.MessageEmbed().setColor('0x00B9F2').setAuthor('mist', '', process.env.WEBPAGE).setTitle(`Game stats of user ${id} for game ${gameid.value}`);
+    //       interaction.followUp({embeds: [embed], files: [attachment]});
+    //     });
+    //   })
+    //       .catch((error) => {
+    //         interaction.followUp({
+    //           embeds: [
+    //             {
+    //               color: process.env.COLOR,
+    //               author: {
+    //                 'name': 'mist',
+    //                 'url': process.env.WEBPAGE,
+    //               },
+    //               title: `Something has gone wrong! ⚠️`,
+    //               description: `${error}`,
+    //             },
+    //           ],
+    //           ephemeral: true,
+    //         });
+    //       });
+    //   break;
+    // }
     case 'playercount': {
       steam.getGameDetails(interaction.options.getInteger('gameid')).then((gameDetails) => {
         steam.getGamePlayers(interaction.options.getInteger('gameid')).then((playercount) => {
