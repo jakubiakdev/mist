@@ -4,27 +4,29 @@ Discord bot for accessing steam using steamapi
 
 [![Discord server invite](https://img.shields.io/discord/828964319764283412?style=for-the-badge)](https://discord.gg/MZhzgdbgsc)
 
-[Slashcommand invite](https://discord.com/oauth2/authorize?client_id=826724857936609291&scope=applications.commands)
+[Slash command invite](https://discord.com/oauth2/authorize?client_id=826724857936609291&scope=applications.commands)
 
 ## Features
 
 - Display Steam profiles
 - Resole SteamID
-- Showcas Steam profiles with screenshots
+- Showcase Steam profiles with screenshots
 - Display internal Steam game stats for a given user
 - Display Steam bans for a user
 - Display current players for a Steam game
-- Display Steam game's storepage in a chat-friendly format
+- Display Steam game's store page in a chat-friendly format
+
+![Showcase video](showcase.gif)
 
 # Selfhosting
 
-## Registering slashcommands
+## Registering slash commands
 
 You need to do this, otherwise you won't have an option to interact with your instance
 
 ### For a single server
 
-`node firstrun.js guild <type in id of your guild>`
+`node firstrun.js guild <type in the id of your guild>`
 
 ### Globally
 
@@ -33,7 +35,7 @@ You need to do this, otherwise you won't have an option to interact with your in
 ## How to run
 
 0. Remember to check .env!
-1. `npn i`
+1. `npm i`
 2. `node main.js` (If you can, screen is recommended)
 
 ## Common issues
