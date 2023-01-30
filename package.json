@@ -3,7 +3,7 @@
     "discord.js": "^13.6.0",
     "dotenv": "^14.3.2",
     "he": "^1.2.0",
-    "puppeteer": "^13.1.2",
+    "puppeteer": "^19.6.2",
     "steamapi": "^2.2.0"
   },
   "name": "mist",
